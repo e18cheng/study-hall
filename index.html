@@ -138,9 +138,11 @@ input[type=checkbox] { accent-color: var(--accent); width: 15px; height: 15px; m
   .pbody { padding: 12px 16px; }
   .prompt { font-size: 19px; margin: 8px 0; }
   /* Outside a quiz the whole page scrolls: map pinned on top, action buttons pinned at the bottom. */
-  body:not(.quizzing) { display: flex; flex-direction: column; height: auto; min-height: 100dvh; overflow: visible; }
-  body:not(.quizzing) #mapwrap { order: -1; position: sticky; top: 0; z-index: 3; flex: none; height: 46dvh; border-bottom: 1px solid var(--border); }
-  body[data-view="home"] #mapwrap { height: min(40dvh, 66vw); }
+  /* svh, not dvh: dvh changes as Safari's toolbar hides while scrolling, which resized the
+     map and shifted everything under the user's finger. */
+  body:not(.quizzing) { display: flex; flex-direction: column; height: auto; min-height: 100vh; min-height: 100svh; overflow: visible; }
+  body:not(.quizzing) #mapwrap { order: -1; position: sticky; top: 0; z-index: 3; flex: none; height: 46vh; height: 46svh; border-bottom: 1px solid var(--border); }
+  body[data-view="home"] #mapwrap { height: min(40vh, 66vw); height: min(40svh, 66vw); }
   body:not(.quizzing) #panel { flex: 1 0 auto; border-bottom: 0; }
   body:not(.quizzing) .pbody { flex: none; overflow: visible; }
   body:not(.quizzing) .pfoot { position: sticky; bottom: 0; background: var(--panel); padding-bottom: calc(10px + env(safe-area-inset-bottom)); box-shadow: 0 -6px 16px rgba(0,0,0,.07); }
@@ -563,22 +565,50 @@ sv.addEventListener('pointermove', e => {
   h ? showTip(h, e.clientX, e.clientY) : hideTip();
 });
 sv.addEventListener('pointerleave', () => { if (hovCode) setHover(hovCode, false); hovCode = null; hideTip(); });
-let tipTimer;
-sv.addEventListener('click', e => {
-  const code = codeAt(e.target);
-  if (!code) return;
+let tipTimer, tap = null, lastTap = 0;
+function onMapTap(code, x, y, touch) {
   if (view === 'home') {
     if (inPlay(code)) toggleRegion(COUNTRY[code].region);
   } else if (view === 'quiz') {
     if (q.mode === 'find') onFindClick(code);
   }
-  if (e.pointerType && e.pointerType !== 'mouse') {
-    const h = tipHtml(code);
-    clearTimeout(tipTimer);
-    if (h) { showTip(h, e.clientX, e.clientY); tipTimer = setTimeout(hideTip, 1800); }
-  } else if (view === 'home') {
-    const h = tipHtml(code); if (h) showTip(h, e.clientX, e.clientY);
+  const h = tipHtml(code);
+  clearTimeout(tipTimer);
+  if (h && (touch || view === 'home')) { showTip(h, x, y); if (touch) tipTimer = setTimeout(hideTip, 1800); }
+}
+// The closest visible small-country dot within r screen px (fingers are bigger than the dots).
+function nearestMarker(x, y, r) {
+  let best = null, bd = r;
+  for (const f of SOV) {
+    if (f.mk.style.display === 'none' || !clickable(f.code)) continue;
+    const b = f.mk.getBoundingClientRect();
+    const d = Math.hypot(b.x + b.width / 2 - x, b.y + b.height / 2 - y);
+    if (d < bd) { bd = d; best = f.code; }
   }
+  return best;
+}
+// Touch taps are detected from pointer events rather than 'click': the zoom behavior
+// cancels the click whenever a finger drifts even a pixel, so taps often didn't register.
+sv.addEventListener('pointerdown', e => {
+  if (e.pointerType === 'mouse') return;
+  // A second finger means a pinch, not a tap.
+  tap = e.isPrimary ? { x: e.clientX, y: e.clientY, t: e.timeStamp, id: e.pointerId, el: e.target } : null;
+});
+sv.addEventListener('pointercancel', () => { tap = null; });
+sv.addEventListener('pointerup', e => {
+  if (e.pointerType === 'mouse' || !tap || e.pointerId !== tap.id) return;
+  const s = tap; tap = null;
+  if (Math.hypot(e.clientX - s.x, e.clientY - s.y) > 12 || e.timeStamp - s.t > 700) return;
+  lastTap = Date.now();
+  const hit = codeAt(s.el);
+  // Right on top of a dot wins over the country underneath; in open sea, snap to a nearby dot.
+  const code = nearestMarker(s.x, s.y, hit ? 7 : 22) || hit;
+  if (code) onMapTap(code, s.x, s.y, true);
+});
+sv.addEventListener('click', e => {
+  if (Date.now() - lastTap < 800) return; // already handled as a touch tap
+  const code = codeAt(e.target);
+  if (code) onMapTap(code, e.clientX, e.clientY, false);
 });
 
 let resizeT;
