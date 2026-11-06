@@ -57,7 +57,9 @@ p { margin: 0 0 10px; }
 .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 .btn.ghost { background: transparent; }
 .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.btns .wide { grid-column: 1 / -1; }
+.btns .wide, .btns .full { grid-column: 1 / -1; }
+.qrow { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.qrow .tally { margin: 0; }
 .back { border: 0; background: none; padding: 0; color: var(--muted); font-size: 13px; margin-bottom: 8px; }
 .back:hover { color: var(--text); }
 
@@ -132,11 +134,28 @@ input[type=checkbox] { accent-color: var(--accent); width: 15px; height: 15px; m
 
 @media (max-width: 760px) {
   body { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); }
-  #panel { border-right: 0; border-bottom: 1px solid var(--border); max-height: 48dvh; }
-  body.quizzing #panel { max-height: none; }
+  #panel { border-right: 0; border-bottom: 1px solid var(--border); }
   .pbody { padding: 12px 16px; }
   .prompt { font-size: 19px; margin: 8px 0; }
-  .clist { columns: 2; }
+  /* Outside a quiz the whole page scrolls: map pinned on top, action buttons pinned at the bottom. */
+  body:not(.quizzing) { display: flex; flex-direction: column; height: auto; min-height: 100dvh; overflow: visible; }
+  body:not(.quizzing) #mapwrap { order: -1; position: sticky; top: 0; z-index: 3; flex: none; height: 46dvh; border-bottom: 1px solid var(--border); }
+  body[data-view="home"] #mapwrap { height: min(40dvh, 66vw); }
+  body:not(.quizzing) #panel { flex: 1 0 auto; border-bottom: 0; }
+  body:not(.quizzing) .pbody { flex: none; overflow: visible; }
+  body:not(.quizzing) .pfoot { position: sticky; bottom: 0; background: var(--panel); padding-bottom: calc(10px + env(safe-area-inset-bottom)); box-shadow: 0 -6px 16px rgba(0,0,0,.07); }
+  .btns { display: flex; flex-wrap: wrap; }
+  .btns > * { flex: 1 1 0; min-width: 28%; padding: 10px 8px; }
+  .btns > .full { flex-basis: 100%; }
+  .hide-sm { display: none; }
+  .reg { padding: 3px 0 3px 2px; }
+  .reg label { padding: 7px 0; }
+  .learn { padding: 4px 9px; }
+  .cont-h { padding: 8px 0 6px; }
+  .clist button { padding: 7px 4px; }
+  .qform input { font-size: 16px; } /* below 16px iOS Safari zooms the page on focus */
+  .zoomctl { right: 8px; bottom: 8px; flex-direction: row; }
+  .zoomctl button { width: 30px; height: 30px; font-size: 15px; }
 }
 </style>
 </head>
@@ -579,6 +598,8 @@ new ResizeObserver(() => {
 function setView(v) {
   view = v;
   document.body.classList.toggle('quizzing', v === 'quiz');
+  document.body.dataset.view = v;
+  window.scrollTo(0, 0);
   active = v === 'home' ? new Set() : new Set(pool);
   const key = v === 'home' ? 'home' : pool.join(',');
   if (key !== projKey) { project(v === 'home' ? [] : pool); projKey = key; }
@@ -653,9 +674,9 @@ function homeHtml() {
     ${hardToggle()}
     <div class="btns">
       <button class="btn wide" data-act="study" ${dis}>Study</button>
-      <button class="btn primary" data-act="quizFind" ${dis}>Quiz: find on map</button>
-      <button class="btn primary" data-act="quizType" ${dis}>Quiz: type names</button>
-      ${weak.length ? `<button class="btn ghost wide" data-act="quizWeak">Quiz weak spots (${weak.length})</button>` : ''}
+      <button class="btn primary" data-act="quizFind" ${dis}><span class="hide-sm">Quiz: </span>Find on map</button>
+      <button class="btn primary" data-act="quizType" ${dis}><span class="hide-sm">Quiz: </span>Type names</button>
+      ${weak.length ? `<button class="btn ghost full" data-act="quizWeak">Quiz weak spots (${weak.length})</button>` : ''}
     </div></div>`;
   return h;
 }
@@ -675,8 +696,8 @@ function studyHtml() {
     h += `</ul>`;
   }
   h += `</div><div class="pfoot">${hardToggle()}<div class="btns">
-    <button class="btn primary" data-act="quizFind">Quiz: find on map</button>
-    <button class="btn primary" data-act="quizType">Quiz: type names</button></div></div>`;
+    <button class="btn primary" data-act="quizFind"><span class="hide-sm">Quiz: </span>Find on map</button>
+    <button class="btn primary" data-act="quizType"><span class="hide-sm">Quiz: </span>Type names</button></div></div>`;
   return h;
 }
 
@@ -688,8 +709,7 @@ function quizHtml() {
     <div class="prompt" id="qprompt"></div>
     ${type ? `<form class="qform" id="qform"><input id="qin" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Country name…"><button class="btn primary">Check</button></form>` : ''}
     <div class="fb" id="qfb"></div>
-    <div class="tally" id="qtally"></div>
-    <button class="btn ghost" data-act="reveal">${type ? 'Reveal' : 'Skip'}</button>
+    <div class="qrow"><div class="tally" id="qtally"></div><button class="btn ghost" data-act="reveal">${type ? 'Reveal' : 'Skip'}</button></div>
   </div>`;
 }
 
@@ -730,7 +750,7 @@ function resultsHtml() {
   const info = poolInfo(q.queue);
   const canLearn = info.full && info.regs.some(r => !store.learned.includes(r));
   h += `</div><div class="pfoot">${hardToggle()}<div class="btns">
-    ${missed.length ? `<button class="btn primary wide" data-act="retryMissed">Retry the ${missed.length} I missed</button>` : ''}
+    ${missed.length ? `<button class="btn primary full" data-act="retryMissed">Retry the ${missed.length} I missed</button>` : ''}
     <button class="btn" data-act="again">Same quiz again</button>
     <button class="btn" data-act="otherMode">${q.mode === 'find' ? 'Try typing mode' : 'Try find mode'}</button>
     ${missed.length ? `<button class="btn ghost" data-act="studyMissed">Study missed</button>` : ''}
