@@ -167,12 +167,14 @@ body.nav-open #nav { transform: none; visibility: visible; transition: transform
 #nav button[data-app] .lbl { font-size: 13px; font-weight: 600; letter-spacing: 0; }
 @media (prefers-reduced-motion: reduce) { #nav, #navScrim { transition: none; } }
 body[data-app="presidents"] #mapwrap { display: none; }
-body[data-app="presidents"] #panel { grid-column: 1 / -1; border-right: 0; }
-/* The header stays full width so the menu button is always at the top left; only the
-   content below it is centred in a readable column. */
-body[data-app="presidents"] .ptitle,
-body[data-app="presidents"] .pbody,
-body[data-app="presidents"] .pfoot { width: 100%; max-width: 920px; margin-left: auto; margin-right: auto; }
+/* Presidents reuse the world layout: controls and status in the left panel, the president
+   list in the main area where the map sits for countries. */
+#presmain { display: none; min-width: 0; min-height: 0; overflow: auto; background: var(--bg); }
+body[data-app="presidents"] #presmain { display: block; }
+.pmain { max-width: 980px; margin: 0 auto; padding: 24px 28px 48px; }
+.pmain h3:first-child { margin-top: 0; }
+.plegend { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; }
+.plegend li { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--muted); }
 
 /* presidents */
 /* Multi-column, not grid: rows read top-down the first column, then the next. */
@@ -213,18 +215,27 @@ body[data-app="presidents"] .pfoot { width: 100%; max-width: 920px; margin-left:
   body[data-view="home"] #mapwrap { height: min(40vh, 66vw); height: min(40svh, 66vw); }
   body:not(.quizzing) .pbody { order: 4; flex: 1 0 auto; overflow: visible; }
   body:not(.quizzing) .pfoot { order: 5; position: sticky; bottom: 0; background: var(--panel); padding-bottom: calc(10px + env(safe-area-inset-bottom)); box-shadow: 0 -6px 16px rgba(0,0,0,.07); }
+  /* Presidents outside the quiz: the panel flattens, so the study list follows the
+     sidebar controls and the action buttons stay pinned at the bottom. */
+  body[data-app="presidents"]:not(.quizzing) #presmain { order: 3; overflow: visible; }
+  body[data-app="presidents"]:not(.quizzing) #presmain .pmain { padding: 0 16px 16px; }
   /* Presidents quiz: a fixed shell. The header and the input stay put and the list scrolls
      between them, instead of the whole page scrolling under a floating input. */
   /* --app-vh is kept in sync with the visual viewport: Safari shrinks that for the keyboard
      but leaves the layout viewport (and 100dvh) alone, then pans the page to reveal the
      focused input, which dragged the whole shell up. */
   body[data-app="presidents"][data-pview="quiz"] { display: flex; flex-direction: column; height: 100vh; height: var(--app-vh, 100vh); min-height: 0; overflow: hidden; background: var(--panel); }
-  body[data-app="presidents"][data-pview="quiz"] #panel { flex: 1; min-height: 0; display: flex; flex-direction: column; border: 0; }
+  /* Flatten the panel so the prompt, the scrolling list and the input can stack in that
+     order; the list itself lives in #presmain. */
+  body[data-app="presidents"][data-pview="quiz"] #panel { display: contents; }
   body[data-app="presidents"][data-pview="quiz"] .phead { order: 0; }
-  body[data-app="presidents"][data-pview="quiz"] .pscroll { order: 0; display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
-  body[data-app="presidents"][data-pview="quiz"] .pbody { order: 0; flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
-  body[data-app="presidents"][data-pview="quiz"] #plist { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; columns: auto; }
-  body[data-app="presidents"][data-pview="quiz"] .pfoot { order: 0; position: static; flex: none; padding-bottom: calc(10px + env(safe-area-inset-bottom)); }
+  /* Undo the non-quiz `display: contents` so the prompt block keeps its own box and order. */
+  body[data-app="presidents"][data-pview="quiz"] .pscroll { order: 1; display: flex; flex-direction: column; flex: none; overflow: visible; }
+  body[data-app="presidents"][data-pview="quiz"] .pbody { flex: none; overflow: visible; display: block; }
+  body[data-app="presidents"][data-pview="quiz"] #presmain { order: 2; display: block; flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; background: var(--panel); }
+  body[data-app="presidents"][data-pview="quiz"] #presmain .pmain { padding: 0 16px; }
+  body[data-app="presidents"][data-pview="quiz"] #plist { columns: 1; }
+  body[data-app="presidents"][data-pview="quiz"] .pfoot { order: 3; position: static; flex: none; padding-bottom: calc(10px + env(safe-area-inset-bottom)); }
   .btns { display: flex; flex-wrap: wrap; }
   .btns > * { flex: 1 1 0; min-width: 28%; padding: 10px 8px; }
   .btns > .full { flex-basis: 100%; }
@@ -252,6 +263,7 @@ body[data-app="presidents"] .pfoot { width: 100%; max-width: 920px; margin-left:
   </button>
 </nav>
 <aside id="panel"></aside>
+<main id="presmain"></main>
 <div id="mapwrap">
   <svg id="map"></svg>
   <div id="tip"></div>
@@ -396,7 +408,7 @@ const FEATS = new Map(); // code -> feature record
 let SOV = [];            // records for sovereign countries
 
 const $ = (s, r = document) => r.querySelector(s);
-const panel = $('#panel'), tip = $('#tip'), mapwrap = $('#mapwrap');
+const panel = $('#panel'), presmain = $('#presmain'), tip = $('#tip'), mapwrap = $('#mapwrap');
 const svg = d3.select('#map'), sv = svg.node();
 const zl = svg.append('g');
 const gC = zl.append('g'), gM = zl.append('g'), gL = zl.append('g'), gFx = zl.append('g');
@@ -1207,6 +1219,15 @@ const presRows = showAll => PRES.map((p, i) => presRow(p, i, showAll)).join('');
 
 function presFb(html, cls) { const el = $('#pfb'); if (el) { el.innerHTML = html; el.className = 'fb ' + cls; } }
 
+const PARTIES = [...new Set(PRES.map(p => p.party))].map(name => ({
+  name, cls: 'pty-' + name.toLowerCase().replace(/[^a-z]+/g, '-'),
+}));
+
+function partyKeyHtml() {
+  return `<h3>Party key</h3><ul class="plegend">${PARTIES.map(p =>
+    `<li><span class="pdot ${p.cls}"></span>${esc(p.name)}</li>`).join('')}</ul>`;
+}
+
 function presHomeHtml() {
   const b = store.presBest;
   return `<div class="pscroll"><div class="ptitle">
@@ -1214,11 +1235,16 @@ function presHomeHtml() {
     <p class="muted small">Type all ${PRES.length} presidents in order. A surname is enough; full names and common nicknames work too.</p>
     ${b ? `<p class="small">Your best: <b>${fmtTime(b.ms)}</b> · ${b.miss} revealed</p>` : ''}
   </div><div class="pbody">
-    <h3>Study list</h3>
-    <ul class="prez">${presRows(true)}</ul>
+    ${partyKeyHtml()}
+    <h3>Good to know</h3>
+    <p class="muted small">${PRES.length} presidencies, ${new Set(PRES.map(p => p.name)).size} people — Cleveland and Trump each served two non-consecutive terms.</p>
   </div></div><div class="pfoot"><div class="btns">
     <button class="btn primary full" data-pact="start">Start typing quiz</button>
   </div></div>`;
+}
+
+function presHomeMainHtml() {
+  return `<div class="pmain"><h3>Study list</h3><ul class="prez">${presRows(true)}</ul></div>`;
 }
 
 function presQuizHtml() {
@@ -1227,11 +1253,14 @@ function presQuizHtml() {
     <div class="bar"><i id="pbar"></i></div>
     <div class="prompt" id="pprompt"></div>
     <div class="fb" id="pfb"></div>
-    <ul class="prez" id="plist">${presRows(false)}</ul>
   </div></div><div class="pfoot">
     <form class="qform" autocomplete="off"><input id="pin" name="president" autocomplete="off" autocapitalize="words" autocorrect="off" spellcheck="false" placeholder="Type a president…"><button class="btn primary">Check</button></form>
     <div class="qrow"><div class="tally" id="ptally"></div><button class="btn ghost" data-pact="reveal">Reveal</button></div>
   </div>`;
+}
+
+function presQuizMainHtml() {
+  return `<div class="pmain"><ul class="prez" id="plist">${presRows(false)}</ul></div>`;
 }
 
 function presResultsHtml() {
@@ -1241,18 +1270,32 @@ function presResultsHtml() {
     <div class="score">${fmtTime(pqz.elapsed)}${pqz.newBest ? '<span class="newbest">New best</span>' : ''}</div>
     <p class="muted">${PRES.length - miss} of ${PRES.length} typed without revealing${miss ? ` · ${miss} revealed` : ' · clean run'}</p>
   </div><div class="pbody">
-    <h3>All presidents</h3>
-    <ul class="prez">${presRows(true)}</ul>
+    ${partyKeyHtml()}
   </div></div><div class="pfoot"><div class="btns">
     <button class="btn primary full" data-pact="start">Play again</button>
     <button class="btn ghost full" data-pact="list">Back to study list</button>
   </div></div>`;
 }
 
+function presResultsMainHtml() {
+  return `<div class="pmain"><h3>All presidents</h3><ul class="prez">${presRows(true)}</ul></div>`;
+}
+
 function renderPres() {
   document.body.dataset.pview = pv;
-  panel.innerHTML = navHeadHtml() + (pv === 'home' ? presHomeHtml() : pv === 'quiz' ? presQuizHtml() : presResultsHtml());
+  const head = navHeadHtml();
+  if (pv === 'quiz') {
+    panel.innerHTML = head + presQuizHtml();
+    presmain.innerHTML = presQuizMainHtml();
+  } else if (pv === 'home') {
+    panel.innerHTML = head + presHomeHtml();
+    presmain.innerHTML = presHomeMainHtml();
+  } else {
+    panel.innerHTML = head + presResultsHtml();
+    presmain.innerHTML = presResultsMainHtml();
+  }
   window.scrollTo(0, 0);
+  presmain.scrollTop = 0;
   if (pv === 'quiz') { updatePresUI(); $('#pin')?.focus(); }
 }
 
@@ -1269,14 +1312,15 @@ function updatePresUI() {
   const list = $('#plist');
   if (list) {
     list.innerHTML = presRows(false);
-    // Only the mobile quiz list is a scroller; keep the current row in view.
-    if (list.scrollHeight > list.clientHeight + 1) {
-      const lr = list.getBoundingClientRect(), cur = list.querySelector('.cur');
+    // The list may be its own scroller (narrow screens) or sit inside #presmain (wide ones).
+    const scroller = list.closest('#presmain') || list;
+    if (scroller.scrollHeight > scroller.clientHeight + 1) {
+      const sr = scroller.getBoundingClientRect(), cur = list.querySelector('.cur');
       if (cur) {
         const cr = cur.getBoundingClientRect();
         // Leave a little air so the highlighted row isn't flush with the edges.
-        if (cr.top < lr.top + 10) list.scrollTop += cr.top - lr.top - 10;
-        else if (cr.bottom > lr.bottom - 10) list.scrollTop += cr.bottom - lr.bottom + 10;
+        if (cr.top < sr.top + 10) scroller.scrollTop += cr.top - sr.top - 10;
+        else if (cr.bottom > sr.bottom - 10) scroller.scrollTop += cr.bottom - sr.bottom + 10;
       }
     }
   }
