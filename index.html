@@ -43,7 +43,10 @@ button:disabled { opacity: .45; cursor: default; }
 
 /* panel */
 #panel { background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; min-height: 0; }
-.pbody { flex: 1; overflow: auto; padding: 16px; }
+.pscroll { flex: 1; min-height: 0; overflow: auto; }
+.ptitle { padding: 16px 16px 0; }
+.ptitle + .pbody { padding-top: 0; }
+.pbody { padding: 16px; }
 .pfoot { border-top: 1px solid var(--border); padding: 12px 16px; display: grid; gap: 8px; }
 h1 { font-size: 20px; margin: 0 0 4px; letter-spacing: -.01em; }
 h2 { font-size: 17px; margin: 4px 0 2px; }
@@ -160,6 +163,7 @@ body.nav-open #nav { transform: none; visibility: visible; transition: transform
 body[data-app="presidents"] #mapwrap { display: none; }
 body[data-app="presidents"] #panel { grid-column: 1 / -1; border-right: 0; }
 body[data-app="presidents"] .phead,
+body[data-app="presidents"] .ptitle,
 body[data-app="presidents"] .pbody,
 body[data-app="presidents"] .pfoot { width: 100%; max-width: 920px; margin-left: auto; margin-right: auto; }
 
@@ -192,12 +196,16 @@ body[data-app="presidents"] .pfoot { width: 100%; max-width: 920px; margin-left:
   /* Outside a quiz the whole page scrolls: map pinned on top, action buttons pinned at the bottom. */
   /* svh, not dvh: dvh changes as Safari's toolbar hides while scrolling, which resized the
      map and shifted everything under the user's finger. */
-  body:not(.quizzing) { display: flex; flex-direction: column; height: auto; min-height: 100vh; min-height: 100svh; overflow: visible; }
-  body:not(.quizzing) #mapwrap { order: -1; position: sticky; top: 0; z-index: 3; flex: none; height: 46vh; height: 46svh; border-bottom: 1px solid var(--border); }
+  body:not(.quizzing) { display: flex; flex-direction: column; height: auto; min-height: 100vh; min-height: 100svh; overflow: visible; background: var(--panel); }
+  /* Flatten the panel so its header, title, body and footer can be ordered around the map. */
+  body:not(.quizzing) #panel,
+  body:not(.quizzing) .pscroll { display: contents; }
+  body:not(.quizzing) .phead { order: 1; }
+  body:not(.quizzing) .ptitle { order: 2; flex: none; padding: 12px 16px 0; }
+  body:not(.quizzing) #mapwrap { order: 3; position: sticky; top: 0; z-index: 3; flex: none; height: 46vh; height: 46svh; border-bottom: 1px solid var(--border); }
   body[data-view="home"] #mapwrap { height: min(40vh, 66vw); height: min(40svh, 66vw); }
-  body:not(.quizzing) #panel { flex: 1 0 auto; border-bottom: 0; }
-  body:not(.quizzing) .pbody { flex: none; overflow: visible; }
-  body:not(.quizzing) .pfoot { position: sticky; bottom: 0; background: var(--panel); padding-bottom: calc(10px + env(safe-area-inset-bottom)); box-shadow: 0 -6px 16px rgba(0,0,0,.07); }
+  body:not(.quizzing) .pbody { order: 4; flex: 1 0 auto; overflow: visible; }
+  body:not(.quizzing) .pfoot { order: 5; position: sticky; bottom: 0; background: var(--panel); padding-bottom: calc(10px + env(safe-area-inset-bottom)); box-shadow: 0 -6px 16px rgba(0,0,0,.07); }
   .btns { display: flex; flex-wrap: wrap; }
   .btns > * { flex: 1 1 0; min-width: 28%; padding: 10px 8px; }
   .btns > .full { flex-basis: 100%; }
@@ -703,11 +711,11 @@ function setView(v) {
 
 function render() {
   if (app === 'presidents') return renderPres();
-  const scroll = $('.pbody', panel)?.scrollTop || 0;
+  const scroll = $('.pscroll', panel)?.scrollTop || 0;
   panel.innerHTML = navHeadHtml() + (view === 'home' ? homeHtml() : view === 'study' ? studyHtml() : view === 'quiz' ? quizHtml() : resultsHtml());
   if (view === 'home') {
     panel.querySelectorAll('[data-ind]').forEach(el => el.indeterminate = true);
-    $('.pbody', panel).scrollTop = scroll;
+    $('.pscroll', panel).scrollTop = scroll;
   }
   if (view === 'quiz') updateQuizUI();
 }
@@ -736,9 +744,10 @@ const weakOf = codes => codes.filter(c => store.stats[c] && store.stats[c].last 
 function homeHtml() {
   const sel = new Set(store.selected), learned = new Set(store.learned);
   const p = selectionPool(), weak = weakOf(p), dis = p.length ? '' : 'disabled';
-  let h = `<div class="pbody">
+  let h = `<div class="pscroll"><div class="ptitle">
     <h1>Country Drill</h1>
     <p class="muted small">Pick regions to study or quiz (or click the map). Mark regions as <b>learned</b> as you go, then quiz all of them together.</p>
+  </div><div class="pbody">
     <div class="quick">
       <button class="chip" data-act="selLearned" ${learned.size ? '' : 'disabled'}>Select learned (${learned.size})</button>
       <button class="chip" data-act="selAll">All</button>
@@ -763,7 +772,7 @@ function homeHtml() {
     }
     h += `</div>`;
   }
-  h += `</div><div class="pfoot">
+  h += `</div></div><div class="pfoot">
     <div class="small">${p.length ? `<b>${p.length}</b> ${p.some(c => COUNTRY[c].terr) ? 'places' : 'countries'} · ${esc(poolInfo(p).title)}` : '<span class="muted">Select at least one region</span>'}</div>
     ${hardToggle()}
     <div class="btns">
@@ -777,8 +786,8 @@ function homeHtml() {
 
 function studyHtml() {
   const info = poolInfo(pool);
-  let h = `<div class="pbody"><button class="back" data-act="home">← Regions</button>
-    <h2>Study</h2><p class="muted">${esc(info.title)}</p>
+  let h = `<div class="pscroll"><div class="ptitle"><button class="back" data-act="home">← Regions</button>
+    <h2>Study</h2><p class="muted">${esc(info.title)}</p></div><div class="pbody">
     <label class="tog"><input type="checkbox" data-labels ${store.labels ? 'checked' : ''}> Show labels on map</label>
     <p class="muted small">Hover or tap the map to see names; scroll / pinch to zoom. Click a name below to find it. Dots show your last quiz result.</p>`;
   for (const rid of info.regs) {
@@ -789,7 +798,7 @@ function studyHtml() {
     }
     h += `</ul>`;
   }
-  h += `</div><div class="pfoot">${hardToggle()}<div class="btns">
+  h += `</div></div><div class="pfoot">${hardToggle()}<div class="btns">
     <button class="btn primary" data-act="quizFind"><span class="hide-sm">Quiz: </span>Find on map</button>
     <button class="btn primary" data-act="quizType"><span class="hide-sm">Quiz: </span>Type names</button></div></div>`;
   return h;
@@ -797,14 +806,14 @@ function studyHtml() {
 
 function quizHtml() {
   const type = q.mode === 'type';
-  return `<div class="pbody">
+  return `<div class="pscroll"><div class="pbody">
     <div class="qbar"><button class="back" data-act="quit">✕ Quit</button><span id="qprog"></span>${q.hard ? '<span class="hardtag">Hard</span>' : ''}<span id="qtime">0:00</span></div>
     <div class="bar"><i id="qbar"></i></div>
     <div class="prompt" id="qprompt"></div>
     ${type ? `<form class="qform" id="qform"><input id="qin" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Country name…"><button class="btn primary">Check</button></form>` : ''}
     <div class="fb" id="qfb"></div>
     <div class="qrow"><div class="tally" id="qtally"></div><button class="btn ghost" data-act="reveal">${type ? 'Reveal' : 'Skip'}</button></div>
-  </div>`;
+  </div></div>`;
 }
 
 function tallyHtml() {
@@ -829,8 +838,8 @@ function resultsHtml() {
   const total = q.queue.length, first = q.queue.filter(c => q.res[c] === 1).length;
   const pct = Math.round(100 * first / total);
   const missed = q.queue.filter(c => q.res[c] !== 1).sort((a, b) => (q.res[a] === 'x' ? 0 : 1) - (q.res[b] === 'x' ? 0 : 1) || nameOf(a).localeCompare(nameOf(b)));
-  let h = `<div class="pbody"><button class="back" data-act="home">← Regions</button>
-    <h2>${q.mode === 'find' ? 'Find on map' : 'Type names'}${q.hard ? ' <span class="hardtag">Hard</span>' : ''} · ${esc(poolInfo(q.queue).title)}</h2>
+  let h = `<div class="pscroll"><div class="ptitle"><button class="back" data-act="home">← Regions</button>
+    <h2>${q.mode === 'find' ? 'Find on map' : 'Type names'}${q.hard ? ' <span class="hardtag">Hard</span>' : ''} · ${esc(poolInfo(q.queue).title)}</h2></div><div class="pbody">
     <div class="score">${pct}%${q.newBest ? '<span class="newbest">New best</span>' : ''}</div>
     <p class="muted">${first} of ${total} on the first try · ${fmtTime(q.elapsed)}</p>
     <div class="tally">${tallyHtml()}</div>`;
@@ -843,7 +852,7 @@ function resultsHtml() {
   }
   const info = poolInfo(q.queue);
   const canLearn = info.full && info.regs.some(r => !store.learned.includes(r));
-  h += `</div><div class="pfoot">${hardToggle()}<div class="btns">
+  h += `</div></div><div class="pfoot">${hardToggle()}<div class="btns">
     ${missed.length ? `<button class="btn primary full" data-act="retryMissed">Retry the ${missed.length} I missed</button>` : ''}
     <button class="btn" data-act="again">Same quiz again</button>
     <button class="btn" data-act="otherMode">${q.mode === 'find' ? 'Try typing mode' : 'Try find mode'}</button>
@@ -1171,25 +1180,26 @@ function presFb(html, cls) { const el = $('#pfb'); if (el) { el.innerHTML = html
 
 function presHomeHtml() {
   const b = store.presBest;
-  return `<div class="pbody">
+  return `<div class="pscroll"><div class="ptitle">
     <h1>US Presidents</h1>
     <p class="muted small">Type all ${PRES.length} presidents in order. A surname is enough; full names and common nicknames work too.</p>
     ${b ? `<p class="small">Your best: <b>${fmtTime(b.ms)}</b> · ${b.miss} revealed</p>` : ''}
+  </div><div class="pbody">
     <h3>Study list</h3>
     <ul class="prez">${presRows(true)}</ul>
-  </div><div class="pfoot"><div class="btns">
+  </div></div><div class="pfoot"><div class="btns">
     <button class="btn primary full" data-pact="start">Start typing quiz</button>
   </div></div>`;
 }
 
 function presQuizHtml() {
-  return `<div class="pbody">
+  return `<div class="pscroll"><div class="pbody">
     <div class="qbar"><button class="back" data-pact="quit">✕ Quit</button><span id="pprog"></span><span id="ptime">0:00</span></div>
     <div class="bar"><i id="pbar"></i></div>
     <div class="prompt" id="pprompt"></div>
     <div class="fb" id="pfb"></div>
     <ul class="prez" id="plist">${presRows(false)}</ul>
-  </div><div class="pfoot">
+  </div></div><div class="pfoot">
     <form class="qform"><input id="pin" autocomplete="off" autocapitalize="words" autocorrect="off" spellcheck="false" placeholder="President name…"><button class="btn primary">Check</button></form>
     <div class="qrow"><div class="tally" id="ptally"></div><button class="btn ghost" data-pact="reveal">Reveal</button></div>
   </div>`;
@@ -1197,13 +1207,14 @@ function presQuizHtml() {
 
 function presResultsHtml() {
   const miss = pqz.revealed.size;
-  return `<div class="pbody">
+  return `<div class="pscroll"><div class="ptitle">
     <h1>All ${PRES.length} — done</h1>
     <div class="score">${fmtTime(pqz.elapsed)}${pqz.newBest ? '<span class="newbest">New best</span>' : ''}</div>
     <p class="muted">${PRES.length - miss} of ${PRES.length} typed without revealing${miss ? ` · ${miss} revealed` : ' · clean run'}</p>
+  </div><div class="pbody">
     <h3>All presidents</h3>
     <ul class="prez">${presRows(true)}</ul>
-  </div><div class="pfoot"><div class="btns">
+  </div></div><div class="pfoot"><div class="btns">
     <button class="btn primary full" data-pact="start">Play again</button>
     <button class="btn ghost full" data-pact="list">Back to study list</button>
   </div></div>`;
