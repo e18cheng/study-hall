@@ -92,7 +92,7 @@ input[type=checkbox] { accent-color: var(--accent); width: 15px; height: 15px; m
 /* quiz */
 .qbar { display: flex; align-items: center; gap: 12px; font-variant-numeric: tabular-nums; color: var(--muted); }
 .qbar .back { margin: 0; }
-.qbar #qtime { margin-left: auto; }
+.qbar #qtime, .qbar #ptime { margin-left: auto; }
 .prompt { font-size: 22px; line-height: 1.25; margin: 14px 0 10px; font-weight: 500; }
 .prompt b { font-weight: 750; }
 .qform { display: flex; gap: 8px; }
@@ -132,8 +132,43 @@ input[type=checkbox] { accent-color: var(--accent); width: 15px; height: 15px; m
 .zoomctl button { width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--border); background: var(--panel); font-size: 17px; line-height: 1; }
 #loading { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); }
 
+/* app switcher rail */
+#nav { position: fixed; inset: 0 auto 0 0; width: 64px; background: var(--panel); border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 0; z-index: 30; }
+#nav button { width: 54px; border: 0; background: none; border-radius: 10px; color: var(--muted);
+  display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 0; font-size: 19px; line-height: 1; }
+#nav button:hover { background: var(--chip); color: var(--text); }
+#nav button.on { background: var(--chip); color: var(--text); }
+#nav button .lbl { font-size: 9px; font-weight: 700; letter-spacing: .02em; }
+body { padding-left: 64px; }
+body[data-app="presidents"] #mapwrap { display: none; }
+body[data-app="presidents"] #panel { grid-column: 1 / -1; border-right: 0; }
+body[data-app="presidents"] .pbody,
+body[data-app="presidents"] .pfoot { width: 100%; max-width: 920px; margin-left: auto; margin-right: auto; }
+
+/* presidents */
+/* Multi-column, not grid: rows read top-down the first column, then the next. */
+.prez { list-style: none; margin: 0; padding: 0; columns: 2; column-gap: 18px; }
+.prez > li { break-inside: avoid; }
+@media (max-width: 720px) { .prez { columns: 1; } }
+.prow { display: flex; align-items: center; gap: 7px; padding: 4px 8px; border-radius: 6px; min-height: 27px; }
+.prow .pn { width: 20px; text-align: right; color: var(--muted); font-size: 11.5px; font-variant-numeric: tabular-nums; flex: none; }
+.prow .pname { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.prow .py { margin-left: auto; color: var(--muted); font-size: 11.5px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.prow .pline { flex: 1; border-bottom: 1px dashed var(--border); height: .9em; opacity: .55; }
+.prow.cur { background: color-mix(in srgb, var(--accent) 12%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent); }
+.prow.cur .pn { color: var(--accent); font-weight: 700; }
+.prow.miss .pname { color: var(--bad); }
+.pdot { width: 7px; height: 7px; border-radius: 50%; background: var(--pc, var(--muted)); flex: none; }
+.pty-independent { --pc: #8a8f98; } .pty-federalist { --pc: #9b6bd6; }
+.pty-democratic-republican { --pc: #2f9e8f; } .pty-democratic { --pc: #2f6fde; }
+.pty-whig { --pc: #d8a13a; } .pty-republican { --pc: #d64242; } .pty-national-union { --pc: #e07a30; }
+
 @media (max-width: 760px) {
-  body { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); }
+  body { padding-left: 52px; grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); }
+  #nav { width: 52px; padding-top: max(8px, env(safe-area-inset-top)); }
+  #nav button { width: 44px; font-size: 17px; }
+  #nav button .lbl { font-size: 8.5px; }
   #panel { border-right: 0; border-bottom: 1px solid var(--border); }
   .pbody { padding: 12px 16px; }
   .prompt { font-size: 19px; margin: 8px 0; }
@@ -161,7 +196,15 @@ input[type=checkbox] { accent-color: var(--accent); width: 15px; height: 15px; m
 }
 </style>
 </head>
-<body>
+<body data-app="countries">
+<nav id="nav">
+  <button data-app="countries" class="on" title="Country Drill" aria-label="Country Drill">
+    <span aria-hidden="true">🌍</span><span class="lbl">World</span>
+  </button>
+  <button data-app="presidents" title="US Presidents" aria-label="US Presidents">
+    <span aria-hidden="true">🏛️</span><span class="lbl">Presidents</span>
+  </button>
+</nav>
 <aside id="panel"></aside>
 <div id="mapwrap">
   <svg id="map"></svg>
@@ -296,6 +339,7 @@ function save() { try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); 
 // State
 // ---------------------------------------------------------------------------
 let view = 'home';     // home | study | quiz | results
+let app = 'countries'; // countries | presidents
 let pool = [];         // country codes for study/quiz/results
 let active = new Set();
 let q = null;          // current quiz
@@ -639,6 +683,7 @@ function setView(v) {
 }
 
 function render() {
+  if (app === 'presidents') return renderPres();
   const scroll = $('.pbody', panel)?.scrollTop || 0;
   panel.innerHTML = view === 'home' ? homeHtml() : view === 'study' ? studyHtml() : view === 'quiz' ? quizHtml() : resultsHtml();
   if (view === 'home') {
@@ -848,7 +893,7 @@ panel.addEventListener('change', e => {
   } else if ('labels' in t.dataset) { store.labels = t.checked; save(); rescale(); }
   else if ('hard' in t.dataset) { store.hard = t.checked; save(); }
 });
-panel.addEventListener('submit', e => { e.preventDefault(); submitGuess(); });
+panel.addEventListener('submit', e => { e.preventDefault(); if (app === 'presidents') submitPres(); else submitGuess(); });
 panel.addEventListener('pointerover', e => {
   const b = e.target.closest('[data-act=locate]');
   if (hovCode) setHover(hovCode, false);
@@ -976,8 +1021,251 @@ function finish() {
   setView('results');
 }
 
+// ---------------------------------------------------------------------------
+// App switcher (World / Presidents)
+// ---------------------------------------------------------------------------
+function setApp(a) {
+  if (!a || a === app) return;
+  app = a;
+  document.body.dataset.app = a;
+  // A country quiz keeps running in the background; the presidents quiz has its own timer.
+  document.body.classList.toggle('quizzing', a === 'countries' && view === 'quiz');
+  for (const b of document.querySelectorAll('#nav [data-app]')) b.classList.toggle('on', b.dataset.app === a);
+  hideTip();
+  if (a === 'presidents') renderPres();
+  else {
+    render();
+    // The map had zero size while hidden, so re-project once it is visible again.
+    requestAnimationFrame(() => {
+      if (!path) return;
+      project(view === 'home' ? [] : pool);
+      if (view === 'quiz' && q && q.mode === 'type' && q.target) q.ringEl = ring(q.target);
+      paintAll();
+    });
+  }
+}
+$('#nav').addEventListener('click', e => {
+  const b = e.target.closest('[data-app]');
+  if (b) setApp(b.dataset.app);
+});
+
+// ---------------------------------------------------------------------------
+// US Presidents — type them in order
+// ---------------------------------------------------------------------------
+// [name, years in office, party, extra accepted answers separated by |]
+const PRESIDENT_DEFS = [
+  ['George Washington', '1789–1797', 'Independent', 'washington'],
+  ['John Adams', '1797–1801', 'Federalist', 'adams'],
+  ['Thomas Jefferson', '1801–1809', 'Democratic-Republican', 'jefferson|tom jefferson'],
+  ['James Madison', '1809–1817', 'Democratic-Republican', 'madison'],
+  ['James Monroe', '1817–1825', 'Democratic-Republican', 'monroe'],
+  ['John Quincy Adams', '1825–1829', 'Democratic-Republican', 'adams|quincy adams|jqa'],
+  ['Andrew Jackson', '1829–1837', 'Democratic', 'jackson'],
+  ['Martin Van Buren', '1837–1841', 'Democratic', 'van buren'],
+  ['William Henry Harrison', '1841', 'Whig', 'harrison|william harrison|whh|tippecanoe'],
+  ['John Tyler', '1841–1845', 'Whig', 'tyler'],
+  ['James K. Polk', '1845–1849', 'Democratic', 'polk|james polk'],
+  ['Zachary Taylor', '1849–1850', 'Whig', 'taylor'],
+  ['Millard Fillmore', '1850–1853', 'Whig', 'fillmore'],
+  ['Franklin Pierce', '1853–1857', 'Democratic', 'pierce'],
+  ['James Buchanan', '1857–1861', 'Democratic', 'buchanan'],
+  ['Abraham Lincoln', '1861–1865', 'Republican', 'lincoln|abe lincoln'],
+  ['Andrew Johnson', '1865–1869', 'National Union', 'johnson|andrew johnson'],
+  ['Ulysses S. Grant', '1869–1877', 'Republican', 'grant|ulysses grant|us grant'],
+  ['Rutherford B. Hayes', '1877–1881', 'Republican', 'hayes|rutherford hayes'],
+  ['James A. Garfield', '1881', 'Republican', 'garfield'],
+  ['Chester A. Arthur', '1881–1885', 'Republican', 'arthur'],
+  ['Grover Cleveland', '1885–1889', 'Democratic', 'cleveland'],
+  ['Benjamin Harrison', '1889–1893', 'Republican', 'harrison|benjamin harrison'],
+  ['Grover Cleveland', '1893–1897', 'Democratic', 'cleveland'],
+  ['William McKinley', '1897–1901', 'Republican', 'mckinley'],
+  ['Theodore Roosevelt', '1901–1909', 'Republican', 'roosevelt|teddy roosevelt|tr'],
+  ['William Howard Taft', '1909–1913', 'Republican', 'taft'],
+  ['Woodrow Wilson', '1913–1921', 'Democratic', 'wilson'],
+  ['Warren G. Harding', '1921–1923', 'Republican', 'harding'],
+  ['Calvin Coolidge', '1923–1929', 'Republican', 'coolidge'],
+  ['Herbert Hoover', '1929–1933', 'Republican', 'hoover'],
+  ['Franklin D. Roosevelt', '1933–1945', 'Democratic', 'roosevelt|fdr'],
+  ['Harry S. Truman', '1945–1953', 'Democratic', 'truman'],
+  ['Dwight D. Eisenhower', '1953–1961', 'Republican', 'eisenhower|ike'],
+  ['John F. Kennedy', '1961–1963', 'Democratic', 'kennedy|jfk'],
+  ['Lyndon B. Johnson', '1963–1969', 'Democratic', 'johnson|lbj'],
+  ['Richard Nixon', '1969–1974', 'Republican', 'nixon'],
+  ['Gerald Ford', '1974–1977', 'Republican', 'ford'],
+  ['Jimmy Carter', '1977–1981', 'Democratic', 'carter'],
+  ['Ronald Reagan', '1981–1989', 'Republican', 'reagan'],
+  ['George H. W. Bush', '1989–1993', 'Republican', 'bush|george bush|hw bush|george herbert walker bush'],
+  ['Bill Clinton', '1993–2001', 'Democratic', 'clinton'],
+  ['George W. Bush', '2001–2009', 'Republican', 'bush|george bush|gw bush'],
+  ['Barack Obama', '2009–2017', 'Democratic', 'obama'],
+  ['Donald Trump', '2017–2021', 'Republican', 'trump'],
+  ['Joe Biden', '2021–2025', 'Democratic', 'biden|joseph biden'],
+  ['Donald Trump', '2025–', 'Republican', 'trump'],
+];
+const PRES = PRESIDENT_DEFS.map(([name, years, party, aliases], i) => ({
+  n: i + 1, name, years, party,
+  cls: 'pty-' + party.toLowerCase().replace(/[^a-z]+/g, '-'),
+  forms: [name, ...aliases.split('|')].filter(Boolean).map(norm),
+}));
+
+let pv = 'home';   // home | quiz | results
+let pqz = null;    // { i, wrong, revealed, t0, elapsed, done }
+let ptimer = null;
+
+function presRow(p, i, showAll) {
+  if (showAll) {
+    return `<li class="prow done" title="${esc(p.party)}"><span class="pn">${p.n}</span>
+      <span class="pdot ${p.cls}"></span><span class="pname">${esc(p.name)}</span><span class="py">${esc(p.years)}</span></li>`;
+  }
+  const done = !!pqz && i < pqz.i;
+  const cur = !!pqz && i === pqz.i;
+  if (!done) {
+    return `<li class="prow todo${cur ? ' cur' : ''}"><span class="pn">${p.n}</span><span class="pline"></span></li>`;
+  }
+  const miss = pqz.revealed.has(i);
+  return `<li class="prow done${cur ? ' cur' : ''}${miss ? ' miss' : ''}" title="${esc(p.party)}">
+    <span class="pn">${p.n}</span><span class="pdot ${p.cls}"></span>
+    <span class="pname">${esc(p.name)}</span><span class="py">${esc(p.years)}</span></li>`;
+}
+const presRows = showAll => PRES.map((p, i) => presRow(p, i, showAll)).join('');
+
+function presFb(html, cls) { const el = $('#pfb'); if (el) { el.innerHTML = html; el.className = 'fb ' + cls; } }
+
+function presHomeHtml() {
+  const b = store.presBest;
+  return `<div class="pbody">
+    <h1>US Presidents</h1>
+    <p class="muted small">Type all ${PRES.length} presidents in order. A surname is enough; full names and common nicknames work too.</p>
+    ${b ? `<p class="small">Your best: <b>${fmtTime(b.ms)}</b> · ${b.miss} revealed</p>` : ''}
+    <h3>Study list</h3>
+    <ul class="prez">${presRows(true)}</ul>
+  </div><div class="pfoot"><div class="btns">
+    <button class="btn primary full" data-pact="start">Start typing quiz</button>
+  </div></div>`;
+}
+
+function presQuizHtml() {
+  return `<div class="pbody">
+    <div class="qbar"><button class="back" data-pact="quit">✕ Quit</button><span id="pprog"></span><span id="ptime">0:00</span></div>
+    <div class="bar"><i id="pbar"></i></div>
+    <div class="prompt" id="pprompt"></div>
+    <div class="fb" id="pfb"></div>
+    <ul class="prez" id="plist">${presRows(false)}</ul>
+  </div><div class="pfoot">
+    <form class="qform"><input id="pin" autocomplete="off" autocapitalize="words" autocorrect="off" spellcheck="false" placeholder="President name…"><button class="btn primary">Check</button></form>
+    <div class="qrow"><div class="tally" id="ptally"></div><button class="btn ghost" data-pact="reveal">Reveal</button></div>
+  </div>`;
+}
+
+function presResultsHtml() {
+  const miss = pqz.revealed.size;
+  return `<div class="pbody">
+    <h1>All ${PRES.length} — done</h1>
+    <div class="score">${fmtTime(pqz.elapsed)}${pqz.newBest ? '<span class="newbest">New best</span>' : ''}</div>
+    <p class="muted">${PRES.length - miss} of ${PRES.length} typed without revealing${miss ? ` · ${miss} revealed` : ' · clean run'}</p>
+    <h3>All presidents</h3>
+    <ul class="prez">${presRows(true)}</ul>
+  </div><div class="pfoot"><div class="btns">
+    <button class="btn primary full" data-pact="start">Play again</button>
+    <button class="btn ghost full" data-pact="list">Back to study list</button>
+  </div></div>`;
+}
+
+function renderPres() {
+  panel.innerHTML = pv === 'home' ? presHomeHtml() : pv === 'quiz' ? presQuizHtml() : presResultsHtml();
+  window.scrollTo(0, 0);
+  if (pv === 'quiz') { updatePresUI(); $('#pin')?.focus(); }
+}
+
+function updatePresUI() {
+  if (!pqz) return;
+  const p = PRES[Math.min(pqz.i, PRES.length - 1)];
+  const set = (id, txt) => { const el = $('#' + id); if (el) el.textContent = txt; };
+  set('pprog', `${Math.min(pqz.i + 1, PRES.length)} / ${PRES.length}`);
+  const bar = $('#pbar'); if (bar) bar.style.width = (100 * pqz.i / PRES.length) + '%';
+  const prompt = $('#pprompt');
+  if (prompt) prompt.innerHTML = pqz.i < PRES.length ? `Type president <b>#${p.n}</b>` : 'All of them!';
+  const tally = $('#ptally');
+  if (tally) tally.innerHTML = `<span title="Revealed"><i class="dot rx"></i>${pqz.revealed.size}</span><span title="Wrong guesses"><i class="dot r3"></i>${pqz.wrong}</span>`;
+  const list = $('#plist'); if (list) list.innerHTML = presRows(false);
+}
+
+function presMatch(guess, p) {
+  if (p.forms.includes(guess)) return true;
+  // An exact name of some other president is wrong, no fuzzy credit (Adams ≠ Adams' typo).
+  if (PRES.some(x => x !== p && x.forms.includes(guess))) return false;
+  return p.forms.some(f => lev(guess, f) <= (f.length >= 9 ? 2 : f.length >= 5 ? 1 : 0));
+}
+
+function startPres() {
+  clearInterval(ptimer);
+  pqz = { i: 0, wrong: 0, revealed: new Set(), t0: Date.now(), elapsed: 0, done: false };
+  pv = 'quiz';
+  renderPres();
+  ptimer = setInterval(() => { const el = $('#ptime'); if (el) el.textContent = fmtTime(Date.now() - pqz.t0); }, 500);
+  $('#pin')?.focus();
+}
+
+function submitPres() {
+  if (!pqz || pqz.done) return;
+  const inp = $('#pin'); if (!inp) return;
+  const guess = norm(inp.value);
+  if (!guess) return;
+  const p = PRES[pqz.i];
+  if (presMatch(guess, p)) {
+    inp.value = '';
+    pqz.i++;
+    presFb(`✓ ${esc(p.name)}`, 'good');
+    if (pqz.i >= PRES.length) return finishPres();
+    updatePresUI();
+    inp.focus();
+  } else {
+    pqz.wrong++;
+    inp.classList.remove('shake'); void inp.offsetWidth; inp.classList.add('shake');
+    inp.select();
+    presFb(pqz.wrong > 1 ? `✗ Still not #${p.n}` : `✗ Not #${p.n} — try again`, 'bad');
+    updatePresUI();
+  }
+}
+
+function revealPres() {
+  if (!pqz || pqz.done) return;
+  const p = PRES[pqz.i];
+  pqz.revealed.add(pqz.i);
+  pqz.i++;
+  presFb(`#${p.n} was <b>${esc(p.name)}</b>`, 'bad');
+  if (pqz.i >= PRES.length) return finishPres();
+  updatePresUI();
+  $('#pin')?.focus();
+}
+
+function finishPres() {
+  clearInterval(ptimer);
+  pqz.elapsed = Date.now() - pqz.t0;
+  pqz.done = true;
+  const prev = store.presBest;
+  const better = !prev || pqz.revealed.size < prev.miss ||
+    (pqz.revealed.size === prev.miss && pqz.elapsed < prev.ms);
+  if (better) { store.presBest = { miss: pqz.revealed.size, ms: pqz.elapsed }; pqz.newBest = !!prev; save(); }
+  pv = 'results';
+  renderPres();
+}
+
+function quitPres() { clearInterval(ptimer); pqz = null; pv = 'home'; renderPres(); }
+
+const PACTIONS = {
+  start: startPres,
+  reveal: revealPres,
+  quit: quitPres,
+  list: () => { pqz = null; pv = 'home'; renderPres(); },
+};
+panel.addEventListener('click', e => {
+  const b = e.target.closest('[data-pact]');
+  if (b && !b.disabled) PACTIONS[b.dataset.pact](b, e);
+});
+
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && view === 'quiz') failTarget();
+  if (e.key === 'Escape' && app === 'countries' && view === 'quiz') failTarget();
 });
 
 init();
