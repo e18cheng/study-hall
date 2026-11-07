@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
 <title>Country Drill</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -209,6 +209,15 @@ body[data-app="presidents"] .pfoot { width: 100%; max-width: 920px; margin-left:
   body[data-view="home"] #mapwrap { height: min(40vh, 66vw); height: min(40svh, 66vw); }
   body:not(.quizzing) .pbody { order: 4; flex: 1 0 auto; overflow: visible; }
   body:not(.quizzing) .pfoot { order: 5; position: sticky; bottom: 0; background: var(--panel); padding-bottom: calc(10px + env(safe-area-inset-bottom)); box-shadow: 0 -6px 16px rgba(0,0,0,.07); }
+  /* Presidents quiz: a fixed shell. The header and the input stay put and the list scrolls
+     between them, instead of the whole page scrolling under a floating input. */
+  body[data-app="presidents"][data-pview="quiz"] { display: flex; flex-direction: column; height: 100vh; height: 100dvh; min-height: 0; overflow: hidden; background: var(--panel); }
+  body[data-app="presidents"][data-pview="quiz"] #panel { flex: 1; min-height: 0; display: flex; flex-direction: column; border: 0; }
+  body[data-app="presidents"][data-pview="quiz"] .phead { order: 0; }
+  body[data-app="presidents"][data-pview="quiz"] .pscroll { order: 0; display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
+  body[data-app="presidents"][data-pview="quiz"] .pbody { order: 0; flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
+  body[data-app="presidents"][data-pview="quiz"] #plist { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; columns: auto; }
+  body[data-app="presidents"][data-pview="quiz"] .pfoot { order: 0; position: static; flex: none; padding-bottom: calc(10px + env(safe-area-inset-bottom)); }
   .btns { display: flex; flex-wrap: wrap; }
   .btns > * { flex: 1 1 0; min-width: 28%; padding: 10px 8px; }
   .btns > .full { flex-basis: 100%; }
@@ -1224,6 +1233,7 @@ function presResultsHtml() {
 }
 
 function renderPres() {
+  document.body.dataset.pview = pv;
   panel.innerHTML = navHeadHtml() + (pv === 'home' ? presHomeHtml() : pv === 'quiz' ? presQuizHtml() : presResultsHtml());
   window.scrollTo(0, 0);
   if (pv === 'quiz') { updatePresUI(); $('#pin')?.focus(); }
@@ -1239,7 +1249,20 @@ function updatePresUI() {
   if (prompt) prompt.innerHTML = pqz.i < PRES.length ? `Type president <b>#${p.n}</b>` : 'All of them!';
   const tally = $('#ptally');
   if (tally) tally.innerHTML = `<span title="Revealed"><i class="dot rx"></i>${pqz.revealed.size}</span><span title="Wrong guesses"><i class="dot r3"></i>${pqz.wrong}</span>`;
-  const list = $('#plist'); if (list) list.innerHTML = presRows(false);
+  const list = $('#plist');
+  if (list) {
+    list.innerHTML = presRows(false);
+    // Only the mobile quiz list is a scroller; keep the current row in view.
+    if (list.scrollHeight > list.clientHeight + 1) {
+      const lr = list.getBoundingClientRect(), cur = list.querySelector('.cur');
+      if (cur) {
+        const cr = cur.getBoundingClientRect();
+        // Leave a little air so the highlighted row isn't flush with the edges.
+        if (cr.top < lr.top + 10) list.scrollTop += cr.top - lr.top - 10;
+        else if (cr.bottom > lr.bottom - 10) list.scrollTop += cr.bottom - lr.bottom + 10;
+      }
+    }
+  }
 }
 
 function presMatch(guess, p) {
