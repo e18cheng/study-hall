@@ -136,11 +136,14 @@ input[type=checkbox] { accent-color: var(--accent); width: 15px; height: 15px; m
 #loading { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); }
 
 /* app switcher: overlay drawer, closed by default so it costs no layout width */
-.phead { display: flex; align-items: center; gap: 8px; flex: none; padding: 6px 12px; border-bottom: 1px solid var(--border); }
+/* 8px left padding: the 30px hit area around the glyph is wider than the glyph itself,
+   so this lines the visible icon up with the 16px content edge below. */
+.phead { display: flex; align-items: center; gap: 2px; flex: none; padding: 6px 12px 6px 8px; border-bottom: 1px solid var(--border); }
 .phead .app { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
-.navbtn { width: 30px; height: 30px; padding: 0; border: 1px solid var(--border); background: var(--chip); border-radius: 8px;
-  color: var(--muted); font-size: 15px; line-height: 1; display: grid; place-items: center; }
-.navbtn:hover { color: var(--text); }
+.navbtn { width: 30px; height: 30px; padding: 0; border: 0; background: none; border-radius: 8px;
+  color: var(--muted); font-size: 16px; line-height: 1; display: grid; place-items: center; }
+.navbtn:hover { background: var(--chip); color: var(--text); }
+.navbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 
 #navScrim { position: fixed; inset: 0; z-index: 40; background: rgba(0, 0, 0, .32); opacity: 0; pointer-events: none; transition: opacity .18s ease; }
 body.nav-open #navScrim { opacity: 1; pointer-events: auto; }
@@ -187,7 +190,7 @@ body[data-app="presidents"] .pfoot { width: 100%; max-width: 920px; margin-left:
 
 @media (max-width: 760px) {
   body { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); }
-  .phead { padding: 4px 12px; }
+  .phead { padding: 4px 12px 4px 8px; }
   .phead .app { font-size: 10px; }
   #nav { width: 260px; }
   #panel { border-right: 0; border-bottom: 1px solid var(--border); }
