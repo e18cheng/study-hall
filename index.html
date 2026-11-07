@@ -168,7 +168,8 @@ body.nav-open #nav { transform: none; visibility: visible; transition: transform
 @media (prefers-reduced-motion: reduce) { #nav, #navScrim { transition: none; } }
 body[data-app="presidents"] #mapwrap { display: none; }
 body[data-app="presidents"] #panel { grid-column: 1 / -1; border-right: 0; }
-body[data-app="presidents"] .phead,
+/* The header stays full width so the menu button is always at the top left; only the
+   content below it is centred in a readable column. */
 body[data-app="presidents"] .ptitle,
 body[data-app="presidents"] .pbody,
 body[data-app="presidents"] .pfoot { width: 100%; max-width: 920px; margin-left: auto; margin-right: auto; }
@@ -1087,10 +1088,19 @@ $('#navScrim').addEventListener('click', () => setNav(false));
 $('#navClose').addEventListener('click', () => setNav(false));
 panel.addEventListener('click', e => { if (e.target.closest('[data-nav-toggle]')) setNav(true); });
 
+// Deep links: #world and #presidents survive a refresh and can be shared.
+const APP_SLUG = { countries: 'world', presidents: 'presidents' };
+const appFromHash = () => (location.hash.replace(/^#\/?/, '') === 'presidents' ? 'presidents' : 'countries');
+function syncHash(a) {
+  const h = '#' + APP_SLUG[a];
+  if (location.hash !== h) history.replaceState(null, '', h);
+}
+
 function setApp(a) {
-  if (!a || a === app) return;
+  if (!a || a === app) { syncHash(app); return; }
   app = a;
   document.body.dataset.app = a;
+  syncHash(a);
   // A country quiz keeps running in the background; the presidents quiz has its own timer.
   document.body.classList.toggle('quizzing', a === 'countries' && view === 'quiz');
   for (const b of document.querySelectorAll('#nav [data-app]')) b.classList.toggle('on', b.dataset.app === a);
@@ -1113,6 +1123,7 @@ $('#nav').addEventListener('click', e => {
   setApp(b.dataset.app);
   setNav(false);
 });
+window.addEventListener('hashchange', () => setApp(appFromHash()));
 
 // ---------------------------------------------------------------------------
 // US Presidents — type them in order
@@ -1374,6 +1385,8 @@ if (window.visualViewport) {
 window.addEventListener('scroll', keepQuizAnchored, { passive: true });
 
 init();
+// Restore the topic from the URL (and canonicalise a bare URL to #world).
+setApp(appFromHash());
 </script>
 </body>
 </html>
