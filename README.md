@@ -1,14 +1,17 @@
-# Country Drill
+# Study Hall
 
-Learn every country region by region: study a region, quiz it (click on the map or type the name), mark it as learned, then quiz all your learned regions together.
+A quiet place to memorize the facts that trivia nights and quiz bowls ask for. Study a topic, then quiz yourself until it sticks.
 
-Live: https://e18cheng.github.io/country-drill/
+Live: https://e18cheng.github.io/study-hall/
 
-A single static page (`index.html`). Progress is saved in your browser's localStorage. Regions and territories are defined in `REGION_DEFS` / `TERR_DEFS` at the top of the script.
+A single static page (`index.html`). Progress is saved in your browser's localStorage.
 
-## Presidents
+## Topics
 
-The switcher on the left opens a second study app: type all 47 US presidents in order, Sporcle-style. Surnames, full names, and common nicknames (`JFK`, `Ike`, `FDR`) all count, and near-miss typos are accepted. The list is defined in `PRESIDENT_DEFS`, where order in the array is the answer order. A study list shows every president with term years and party; best time is saved in localStorage.
+The menu on the left switches between study topics:
+
+- **World Geography** — study every country region by region: quiz it by clicking the map or typing the name, mark it as learned, then quiz all your learned regions together. Regions and territories are defined in `REGION_DEFS` / `TERR_DEFS` at the top of the script.
+- **US Presidents** — type all 47 presidents in order, Sporcle-style. Surnames, full names, and common nicknames (`JFK`, `Ike`, `FDR`) all count, and near-miss typos are accepted. The list is defined in `PRESIDENT_DEFS`, where order in the array is the answer order. A study list shows every president with term years and party; best time is saved in localStorage.
 
 ## Map data
 

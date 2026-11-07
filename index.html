@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
-<title>Country Drill</title>
+<title>Study Hall</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>
@@ -241,9 +241,9 @@ body[data-app="presidents"] .pfoot { width: 100%; max-width: 920px; margin-left:
 </head>
 <body data-app="countries">
 <div id="navScrim"></div>
-<nav id="nav" aria-label="Study apps">
-  <div class="navhead"><span>Study</span><button id="navClose" aria-label="Close menu">✕</button></div>
-  <button data-app="countries" class="on" aria-label="Country Drill">
+<nav id="nav" aria-label="Study topics">
+  <div class="navhead"><span>Study Hall</span><button id="navClose" aria-label="Close menu">✕</button></div>
+  <button data-app="countries" class="on" aria-label="World Geography">
     <span aria-hidden="true">🌍</span><span class="lbl">World</span>
   </button>
   <button data-app="presidents" aria-label="US Presidents">
@@ -763,7 +763,7 @@ function homeHtml() {
   const sel = new Set(store.selected), learned = new Set(store.learned);
   const p = selectionPool(), weak = weakOf(p), dis = p.length ? '' : 'disabled';
   let h = `<div class="pscroll"><div class="ptitle">
-    <h1>Country Drill</h1>
+    <h1>World Geography</h1>
     <p class="muted small">Pick regions to study or quiz (or click the map). Mark regions as <b>learned</b> as you go, then quiz all of them together.</p>
   </div><div class="pbody">
     <div class="quick">
