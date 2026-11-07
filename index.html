@@ -211,7 +211,10 @@ body[data-app="presidents"] .pfoot { width: 100%; max-width: 920px; margin-left:
   body:not(.quizzing) .pfoot { order: 5; position: sticky; bottom: 0; background: var(--panel); padding-bottom: calc(10px + env(safe-area-inset-bottom)); box-shadow: 0 -6px 16px rgba(0,0,0,.07); }
   /* Presidents quiz: a fixed shell. The header and the input stay put and the list scrolls
      between them, instead of the whole page scrolling under a floating input. */
-  body[data-app="presidents"][data-pview="quiz"] { display: flex; flex-direction: column; height: 100vh; height: 100dvh; min-height: 0; overflow: hidden; background: var(--panel); }
+  /* --app-vh is kept in sync with the visual viewport: Safari shrinks that for the keyboard
+     but leaves the layout viewport (and 100dvh) alone, then pans the page to reveal the
+     focused input, which dragged the whole shell up. */
+  body[data-app="presidents"][data-pview="quiz"] { display: flex; flex-direction: column; height: 100vh; height: var(--app-vh, 100vh); min-height: 0; overflow: hidden; background: var(--panel); }
   body[data-app="presidents"][data-pview="quiz"] #panel { flex: 1; min-height: 0; display: flex; flex-direction: column; border: 0; }
   body[data-app="presidents"][data-pview="quiz"] .phead { order: 0; }
   body[data-app="presidents"][data-pview="quiz"] .pscroll { order: 0; display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
@@ -822,7 +825,7 @@ function quizHtml() {
     <div class="qbar"><button class="back" data-act="quit">✕ Quit</button><span id="qprog"></span>${q.hard ? '<span class="hardtag">Hard</span>' : ''}<span id="qtime">0:00</span></div>
     <div class="bar"><i id="qbar"></i></div>
     <div class="prompt" id="qprompt"></div>
-    ${type ? `<form class="qform" id="qform"><input id="qin" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Country name…"><button class="btn primary">Check</button></form>` : ''}
+    ${type ? `<form class="qform" id="qform" autocomplete="off"><input id="qin" name="country" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Type a country…"><button class="btn primary">Check</button></form>` : ''}
     <div class="fb" id="qfb"></div>
     <div class="qrow"><div class="tally" id="qtally"></div><button class="btn ghost" data-act="reveal">${type ? 'Reveal' : 'Skip'}</button></div>
   </div></div>`;
@@ -1212,7 +1215,7 @@ function presQuizHtml() {
     <div class="fb" id="pfb"></div>
     <ul class="prez" id="plist">${presRows(false)}</ul>
   </div></div><div class="pfoot">
-    <form class="qform"><input id="pin" autocomplete="off" autocapitalize="words" autocorrect="off" spellcheck="false" placeholder="President name…"><button class="btn primary">Check</button></form>
+    <form class="qform" autocomplete="off"><input id="pin" name="president" autocomplete="off" autocapitalize="words" autocorrect="off" spellcheck="false" placeholder="Type a president…"><button class="btn primary">Check</button></form>
     <div class="qrow"><div class="tally" id="ptally"></div><button class="btn ghost" data-pact="reveal">Reveal</button></div>
   </div>`;
 }
@@ -1344,6 +1347,28 @@ document.addEventListener('keydown', e => {
   if (document.body.classList.contains('nav-open')) { setNav(false); return; }
   if (app === 'countries' && view === 'quiz') failTarget();
 });
+
+// iOS Safari does not resize the layout viewport when the keyboard opens: only the visual
+// viewport shrinks, and Safari pans the page to reveal the focused input. Sizing the
+// presidents quiz shell to the visual viewport keeps the input anchored above the keyboard
+// and leaves the list as the only thing that scrolls.
+const keepQuizAnchored = () => {
+  const d = document.body.dataset;
+  if (d.app === 'presidents' && d.pview === 'quiz' && window.scrollY) window.scrollTo(0, 0);
+};
+if (window.visualViewport) {
+  const vv = window.visualViewport;
+  const syncAppVh = () => {
+    document.documentElement.style.setProperty('--app-vh', vv.height + 'px');
+    keepQuizAnchored();
+  };
+  vv.addEventListener('resize', syncAppVh);
+  vv.addEventListener('scroll', syncAppVh);
+  syncAppVh();
+}
+// Safari also scrolls the document itself to reveal the focused input; undo that so the
+// header stays at the top of the shell.
+window.addEventListener('scroll', keepQuizAnchored, { passive: true });
 
 init();
 </script>
