@@ -136,12 +136,15 @@ input[type=checkbox] { accent-color: var(--accent); width: 15px; height: 15px; m
 #loading { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); }
 
 /* app switcher: overlay drawer, closed by default so it costs no layout width */
-/* 8px left padding: the 30px hit area around the glyph is wider than the glyph itself,
-   so this lines the visible icon up with the 16px content edge below. */
-.phead { display: flex; align-items: center; gap: 2px; flex: none; padding: 6px 12px 6px 8px; border-bottom: 1px solid var(--border); }
+/* 9px left padding: the 30px hit area is wider than the 16px icon, so this lines the
+   visible bars up with the 16px content edge below. */
+.phead { display: flex; align-items: center; gap: 2px; flex: none; padding: 6px 12px 6px 9px; border-bottom: 1px solid var(--border); }
 .phead .app { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
 .navbtn { width: 30px; height: 30px; padding: 0; border: 0; background: none; border-radius: 8px;
-  color: var(--muted); font-size: 16px; line-height: 1; display: grid; place-items: center; }
+  color: var(--muted); display: grid; place-items: center; }
+/* Drawn rather than the ☰ character: glyph side bearings differ between browsers and left
+   the icon a couple of pixels off-centre. */
+.navbtn .navicon { display: block; width: 16px; height: 12px; fill: currentColor; }
 .navbtn:hover { background: var(--chip); color: var(--text); }
 .navbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 
@@ -190,7 +193,7 @@ body[data-app="presidents"] .pfoot { width: 100%; max-width: 920px; margin-left:
 
 @media (max-width: 760px) {
   body { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); }
-  .phead { padding: 4px 12px 4px 8px; }
+  .phead { padding: 4px 12px 4px 9px; }
   .phead .app { font-size: 10px; }
   #nav { width: 260px; }
   #panel { border-right: 0; border-bottom: 1px solid var(--border); }
@@ -1070,7 +1073,7 @@ function finish() {
 const APP_LABEL = { countries: 'World', presidents: 'Presidents' };
 function navHeadHtml() {
   const open = document.body.classList.contains('nav-open');
-  return `<div class="phead"><button class="navbtn" data-nav-toggle aria-label="Open menu" aria-expanded="${open}">☰</button><span class="app">${APP_LABEL[app]}</span></div>`;
+  return `<div class="phead"><button class="navbtn" data-nav-toggle aria-label="Open menu" aria-expanded="${open}"><svg class="navicon" viewBox="0 0 16 12" aria-hidden="true" focusable="false"><rect x="0" y="0" width="16" height="2" rx="1"/><rect x="0" y="5" width="16" height="2" rx="1"/><rect x="0" y="10" width="16" height="2" rx="1"/></svg></button><span class="app">${APP_LABEL[app]}</span></div>`;
 }
 
 function setNav(open) {
