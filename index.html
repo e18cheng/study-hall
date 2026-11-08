@@ -107,6 +107,13 @@ input[type=checkbox] { accent-color: var(--accent); width: 15px; height: 15px; m
 .qform { display: flex; gap: 8px; }
 .qform input { flex: 1; min-width: 0; padding: 9px 11px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); outline: none; }
 .qform input:focus { border-color: var(--accent); }
+/* iOS offers contact AutoFill on text fields it mistakes for name/address fields. A neutral
+   name and placeholder keep the bar away; this hides the in-field AutoFill button too. */
+input[autocomplete="off"]::-webkit-contacts-auto-fill-button,
+input[autocomplete="off"]::-webkit-credentials-auto-fill-button {
+  visibility: hidden; display: none !important; pointer-events: none;
+  height: 0; width: 0; margin: 0;
+}
 .shake { animation: shake .35s; }
 @keyframes shake { 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
 .fb { min-height: 22px; margin: 10px 0; font-weight: 600; }
@@ -228,6 +235,9 @@ body[data-app="presidents"] #presmain { display: block; }
   body:not(.quizzing) .ptitle { order: 2; flex: none; padding: 12px 16px 0; }
   body:not(.quizzing) #mapwrap { order: 3; position: sticky; top: 0; z-index: 3; flex: none; height: 46vh; height: 46svh; border-bottom: 1px solid var(--border); }
   body[data-view="home"] #mapwrap { height: min(40vh, 66vw); height: min(40svh, 66vw); }
+  /* Country quiz: size the grid to the visual viewport so the map fits above the
+     keyboard and re-projects into the space that is actually visible. */
+  body[data-app="countries"].quizzing { height: 100vh; height: var(--app-vh, 100vh); }
   body:not(.quizzing) .pbody { order: 4; flex: 1 0 auto; overflow: visible; }
   body:not(.quizzing) .pfoot { order: 5; position: sticky; bottom: 0; background: var(--panel); padding-bottom: calc(10px + env(safe-area-inset-bottom)); box-shadow: 0 -6px 16px rgba(0,0,0,.07); }
   /* Presidents outside the quiz: the panel flattens, so the study list follows the
@@ -633,14 +643,24 @@ function flash(code, kind = 'bad') {
   }
 }
 
-function zoomTo(code) {
+function zoomTo(code, ms = 650) {
   const f = FEATS.get(code);
   const [[x0, y0], [x1, y1]] = path.bounds(f.fit);
   const [W, H] = mapSize();
   const kk = Math.max(1, Math.min(12, 0.4 * Math.min(W / Math.max(x1 - x0, 1), H / Math.max(y1 - y0, 1))));
   const t = d3.zoomIdentity.translate(W / 2, H / 2).scale(kk).translate(-(x0 + x1) / 2, -(y0 + y1) / 2);
-  svg.transition().duration(650).call(zoom.transform, t);
+  if (ms) svg.transition().duration(ms).call(zoom.transform, t);
+  else svg.call(zoom.transform, t);
 }
+
+// In type mode the highlighted country is the question, so centre it in the map. On iOS
+// the keyboard changes the visual viewport after focus; pass ms = 0 when the map has just
+// resized so the target lands in the new visible area in one frame instead of animating
+// from the old centre.
+function centerQuizTarget(ms = 450) {
+  if (view === 'quiz' && q && q.mode === 'type' && q.target) zoomTo(q.target, ms);
+}
+const keyboardOpen = () => !!window.visualViewport && window.visualViewport.height < window.innerHeight - 120;
 
 // hover + tooltip
 let hovCode = null;
@@ -738,7 +758,10 @@ new ResizeObserver(() => {
   resizeT = setTimeout(() => {
     if (!path) return;
     project(view === 'home' ? [] : pool);
-    if (view === 'quiz' && q.mode === 'type' && q.target) q.ringEl = ring(q.target);
+    if (view === 'quiz' && q.mode === 'type' && q.target) {
+      q.ringEl = ring(q.target);
+      centerQuizTarget(0);
+    }
     paintAll();
   }, 120);
 }).observe(sv);
@@ -747,6 +770,7 @@ new ResizeObserver(() => {
 // Views
 // ---------------------------------------------------------------------------
 function setView(v) {
+  const prev = view;
   view = v;
   document.body.classList.toggle('quizzing', v === 'quiz');
   document.body.dataset.view = v;
@@ -754,6 +778,9 @@ function setView(v) {
   active = v === 'home' ? new Set() : new Set(pool);
   const key = v === 'home' ? 'home' : pool.join(',');
   if (key !== projKey) { project(v === 'home' ? [] : pool); projKey = key; }
+  // The projection is shared by study/quiz/results, but a type quiz zooms to its target.
+  // Leaving the quiz must restore the pool view, so reset the zoom on any view change.
+  if (v !== prev) svg.call(zoom.transform, d3.zoomIdentity);
   if (hovCode) setHover(hovCode, false); hovCode = null; hideTip();
   paintAll();
   render();
@@ -860,7 +887,7 @@ function quizHtml() {
     <div class="qbar"><button class="back" data-act="quit">✕ Quit</button><span id="qprog"></span>${q.hard ? '<span class="hardtag">Hard</span>' : ''}<span id="qtime">0:00</span></div>
     <div class="bar"><i id="qbar"></i></div>
     <div class="prompt" id="qprompt"></div>
-    ${type ? `<form class="qform" id="qform" autocomplete="off"><input id="qin" name="country" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Type a country…"><button class="btn primary">Check</button></form>` : ''}
+    ${type ? `<form class="qform" id="qform" autocomplete="off"><input id="qin" name="answer" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" placeholder="Type your answer…"><button class="btn primary">Check</button></form>` : ''}
     <div class="fb" id="qfb"></div>
     <div class="qrow"><div class="tally" id="qtally"></div><button class="btn ghost" data-act="reveal">${type ? 'Reveal' : 'Skip'}</button></div>
   </div></div>`;
@@ -992,6 +1019,8 @@ function startQuiz(mode, codes) {
   const info = poolInfo(pool);
   const hard = store.hard;
   q = { mode, hard, queue: shuffle(pool), i: -1, tries: 0, res: {}, start: Date.now(), bestKey: info.key ? `${mode}${hard ? '!' : ''}:${info.key}` : null };
+  // Start every run from a fresh pool view; type mode then centres the first target.
+  projKey = null;
   setView('quiz');
   timer = setInterval(() => { const el = $('#qtime'); if (el) el.textContent = fmtTime(Date.now() - q.start); }, 500);
   next();
@@ -1007,6 +1036,8 @@ function next() {
   if (q.mode === 'type') {
     q.ringEl = ring(q.target);
     const inp = $('#qin'); inp.value = ''; inp.focus();
+    // Before the keyboard opens there is no visible map to centre in; snap once it has.
+    centerQuizTarget(keyboardOpen() ? 450 : 0);
   }
   updateQuizUI();
 }
@@ -1143,7 +1174,10 @@ function setApp(a) {
     requestAnimationFrame(() => {
       if (!path) return;
       project(view === 'home' ? [] : pool);
-      if (view === 'quiz' && q && q.mode === 'type' && q.target) q.ringEl = ring(q.target);
+      if (view === 'quiz' && q && q.mode === 'type' && q.target) {
+        q.ringEl = ring(q.target);
+        centerQuizTarget(0);
+      }
       paintAll();
     });
   }
@@ -1273,7 +1307,7 @@ function presQuizHtml() {
     <div class="prompt" id="pprompt"></div>
     <div class="fb" id="pfb"></div>
   </div></div><div class="pfoot">
-    <form class="qform" autocomplete="off"><input id="pin" name="president" autocomplete="off" autocapitalize="words" autocorrect="off" spellcheck="false" placeholder="Type a president…"><button class="btn primary">Check</button></form>
+    <form class="qform" autocomplete="off"><input id="pin" name="answer" autocomplete="off" autocapitalize="words" autocorrect="off" spellcheck="false" enterkeyhint="done" placeholder="Type your answer…"><button class="btn primary">Check</button></form>
     <div class="qrow"><div class="tally" id="ptally"></div><button class="btn ghost" data-pact="reveal">Reveal</button></div>
   </div>`;
 }
@@ -1431,7 +1465,9 @@ document.addEventListener('keydown', e => {
 // and leaves the list as the only thing that scrolls.
 const keepQuizAnchored = () => {
   const d = document.body.dataset;
-  if (d.app === 'presidents' && d.pview === 'quiz' && window.scrollY) window.scrollTo(0, 0);
+  const quizzing = (d.app === 'presidents' && d.pview === 'quiz') ||
+    (d.app === 'countries' && d.view === 'quiz');
+  if (quizzing && window.scrollY) window.scrollTo(0, 0);
 };
 if (window.visualViewport) {
   const vv = window.visualViewport;
