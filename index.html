@@ -3,9 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
+<meta name="theme-color" content="#f5f4ef">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Study Hall">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>Study Hall</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
 <style>
 :root {
   --bg: #f5f4ef; --panel: #ffffff; --text: #1f2328; --muted: #6a6f76; --border: #e4e2db; --chip: #f0efe9;
@@ -148,6 +153,15 @@ input[type=checkbox] { accent-color: var(--accent); width: 15px; height: 15px; m
 .navbtn:hover { background: var(--chip); color: var(--text); }
 .navbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 
+/* update notice: shown only when a new service worker is waiting */
+#updateBanner { position: fixed; z-index: 60; top: calc(8px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 10px; max-width: calc(100vw - 24px);
+  background: var(--text); color: var(--panel); border-radius: 999px; padding: 7px 8px 7px 14px;
+  font-size: 13px; box-shadow: 0 6px 20px rgba(0,0,0,.22); }
+#updateBanner[hidden] { display: none; }
+#updateBanner button { border: 0; background: var(--accent); color: var(--accent-ink);
+  border-radius: 999px; padding: 5px 12px; font-weight: 700; }
+
 #navScrim { position: fixed; inset: 0; z-index: 40; background: rgba(0, 0, 0, .32); opacity: 0; pointer-events: none; transition: opacity .18s ease; }
 body.nav-open #navScrim { opacity: 1; pointer-events: auto; }
 #nav { position: fixed; inset: 0 auto 0 0; width: 240px; max-width: 84vw; z-index: 41; background: var(--panel);
@@ -252,6 +266,10 @@ body[data-app="presidents"] #presmain { display: block; }
 </style>
 </head>
 <body data-app="countries">
+<div id="updateBanner" hidden>
+  <span>A new version is available.</span>
+  <button type="button" id="updateReload">Reload</button>
+</div>
 <div id="navScrim"></div>
 <nav id="nav" aria-label="Study topics">
   <div class="navhead"><span>Study Hall</span><button id="navClose" aria-label="Close menu">✕</button></div>
@@ -275,8 +293,8 @@ body[data-app="presidents"] #presmain { display: block; }
   <div id="loading">Loading map…</div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
+<script src="d3.min.js"></script>
+<script src="topojson-client.min.js"></script>
 <script src="map-data.js"></script>
 <script>
 // ---------------------------------------------------------------------------
@@ -1431,6 +1449,39 @@ window.addEventListener('scroll', keepQuizAnchored, { passive: true });
 init();
 // Restore the topic from the URL (and canonicalise a bare URL to #world).
 setApp(appFromHash());
+
+// Offline support. The first visit installs the worker; a later release waits until the
+// banner is used or every tab is closed, so an update never interrupts a quiz.
+if ('serviceWorker' in navigator) {
+  let reloadRequested = false;
+  const showUpdate = () => { const b = $('#updateBanner'); if (b) b.hidden = false; };
+
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (reloadRequested) location.reload();
+  });
+
+  window.addEventListener('load', async () => {
+    try {
+      const reg = await navigator.serviceWorker.register('sw.js');
+      // Ask for durable storage so the browser is less likely to evict saved progress.
+      if (navigator.storage?.persist) navigator.storage.persist().catch(() => {});
+      if (reg.waiting && navigator.serviceWorker.controller) showUpdate();
+      reg.addEventListener('updatefound', () => {
+        const worker = reg.installing;
+        worker?.addEventListener('statechange', () => {
+          if (worker.state === 'installed' && navigator.serviceWorker.controller) showUpdate();
+        });
+      });
+      $('#updateReload')?.addEventListener('click', () => {
+        reloadRequested = true;
+        if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+        else location.reload();
+      });
+    } catch (e) {
+      // Offline support is a progressive enhancement; the app still works online.
+    }
+  });
+}
 </script>
 </body>
 </html>

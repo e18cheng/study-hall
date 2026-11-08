@@ -6,6 +6,12 @@ Live: https://e18cheng.github.io/study-hall/
 
 A single static page (`index.html`). Progress is saved in your browser's localStorage.
 
+## Install and offline
+
+Study Hall is a PWA. On iOS, open the site in Safari and choose **Share → Add to Home Screen**. On Chrome/Android, use the install prompt. The first visit caches the page, map data, libraries, and icons, so the app keeps working offline; progress stays in localStorage.
+
+The libraries (`d3.min.js`, `topojson-client.min.js`) are checked in rather than loaded from a CDN so the app has no network dependency. The service worker lives in `sw.js`; bump `CACHE` there whenever a release changes any cached file, since an old worker keeps serving its cache until every tab using it is closed.
+
 ## Topics
 
 The menu on the left switches between study topics:
