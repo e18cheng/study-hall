@@ -12,6 +12,10 @@ Study Hall is a PWA. On iOS, open the site in Safari and choose **Share → Add 
 
 The libraries (`d3.min.js`, `topojson-client.min.js`) are checked in rather than loaded from a CDN so the app has no network dependency. The service worker lives in `sw.js`; bump `CACHE` there whenever a release changes any cached file, since an old worker keeps serving its cache until every tab using it is closed.
 
+## Home page
+
+Opening the bare URL shows a home page with a card for each topic, its one-line description, and any progress saved on this device. Choosing a topic writes its hash (`#world`, `#presidents`, or `#shakespeare`) to the URL, so a refresh keeps you on that topic; choosing **Home** (or the desk logo in the header) removes the hash and returns to the picker. Deep links can be shared.
+
 ## Topics
 
 The menu on the left switches between study topics:

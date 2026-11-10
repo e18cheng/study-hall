@@ -163,6 +163,10 @@ input[autocomplete="off"]::-webkit-credentials-auto-fill-button {
 .navbtn .navicon { display: block; width: 16px; height: 12px; fill: currentColor; }
 .navbtn:hover { background: var(--chip); color: var(--text); }
 .navbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.homelogo { width: 30px; height: 30px; padding: 3px; border: 0; background: none; border-radius: 8px; flex: none; display: grid; place-items: center; }
+.homelogo:hover { background: var(--chip); }
+.homelogo:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.homelogo img { width: 22px; height: 22px; display: block; }
 
 /* update notice: shown only when a new service worker is waiting */
 #updateBanner { position: fixed; z-index: 60; top: calc(8px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%);
@@ -196,6 +200,24 @@ body[data-module="list"] #mapwrap { display: none; }
    list in the main area where the map sits for countries. */
 #listmain { display: none; min-width: 0; min-height: 0; overflow: auto; background: var(--bg); }
 body[data-module="list"] #listmain { display: block; }
+/* Home is a full-width topic picker: the map and the list engine are both out of the way. */
+body[data-module="home"] #mapwrap { display: none; }
+body[data-module="home"] #listmain { display: block; }
+
+/* home topic cards */
+.home-main h2 { margin: 0 0 12px; font-size: 15px; font-weight: 700; letter-spacing: 0; text-transform: none; color: var(--text); }
+.topics { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.topic { display: flex; align-items: flex-start; gap: 14px; width: 100%; padding: 16px; border: 1px solid var(--border);
+  border-radius: 14px; background: var(--panel); text-align: left;
+  transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease; }
+.topic:hover { border-color: var(--accent); box-shadow: 0 6px 20px rgba(0,0,0,.07); transform: translateY(-1px); }
+.topic:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.topic .ticon { font-size: 26px; line-height: 1.1; flex: none; }
+.topic .tbody { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.topic .tname { font-size: 16px; font-weight: 700; letter-spacing: -.01em; }
+.topic .tdesc { font-size: 12.5px; color: var(--muted); }
+.topic .tprog { margin-top: 5px; font-size: 11.5px; font-weight: 600; color: var(--accent); font-variant-numeric: tabular-nums; }
+@media (prefers-reduced-motion: reduce) { .topic { transition: none; } }
 .lmain { max-width: 980px; margin: 0 auto; padding: 24px 28px 48px; }
 .lmain h3:first-child { margin-top: 0; }
 .llegend { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; }
@@ -290,6 +312,10 @@ body[data-module="list"] #listmain { display: block; }
      sidebar controls and the action buttons stay pinned at the bottom. */
   body[data-module="list"]:not(.quizzing) #listmain { order: 3; overflow: visible; }
   body[data-module="list"]:not(.quizzing) #listmain .lmain { padding: 0 16px 16px; }
+  /* Home: the heading comes from the flattened panel, then the topic cards. */
+  body[data-module="home"]:not(.quizzing) #listmain { order: 3; flex: 1 0 auto; overflow: visible; }
+  body[data-module="home"]:not(.quizzing) #listmain .lmain { padding: 0 16px 24px; }
+  body[data-module="home"] .topics { grid-template-columns: 1fr; }
   /* Shakespeare home: the mode picker and start buttons come first, then the long
      guide, so the round can be started without scrolling past 39 plays. */
   body[data-app="shakespeare"][data-module="list"][data-lview="home"] .pbody { order: 3; }
@@ -341,7 +367,10 @@ body[data-module="list"] #listmain { display: block; }
 <div id="navScrim"></div>
 <nav id="nav" aria-label="Study topics">
   <div class="navhead"><span>Study Hall</span><button id="navClose" aria-label="Close menu">✕</button></div>
-  <button data-app="countries" class="on" aria-label="World Geography">
+  <button data-app="home" aria-label="Study Hall home">
+    <span aria-hidden="true">🏠</span><span class="lbl">Home</span>
+  </button>
+  <button data-app="countries" aria-label="World Geography">
     <span aria-hidden="true">🌍</span><span class="lbl">World</span>
   </button>
   <button data-app="presidents" aria-label="US Presidents">
@@ -848,6 +877,7 @@ function setView(v) {
 }
 
 function render() {
+  if (app === 'home') { activeList = null; return renderHome(); }
   if (app === 'shakespeare') { activeList = null; return renderShakes(); }
   if (LIST_MODULES[app]) { activeList = app; return renderList(LIST_MODULES[app]); }
   const scroll = $('.pscroll', panel)?.scrollTop || 0;
@@ -1202,12 +1232,60 @@ function finish() {
 }
 
 // ---------------------------------------------------------------------------
-// App switcher (World / Presidents)
+// Home (topic picker)
 // ---------------------------------------------------------------------------
-const APP_LABEL = { countries: 'World', presidents: 'Presidents', shakespeare: 'Shakespeare' };
+function homePanelHtml() {
+  return `<div class="pscroll"><div class="ptitle">
+    <h1>Study Hall</h1>
+    <p class="muted small">Pick a topic, study it, then quiz yourself until it sticks. Progress is saved on this device, and the app works offline once installed.</p>
+  </div></div>`;
+}
+
+function homeMainHtml() {
+  const learned = store.learned.length;
+  const regionCount = Object.keys(REGIONS).length;
+  const world = learned
+    ? `${learned} / ${regionCount} regions learned`
+    : `${regionCount} regions · ${Object.keys(COUNTRY).length} places`;
+  const pres = store.presBest
+    ? `Best ${fmtTime(store.presBest.ms)}${store.presBest.miss ? ` · ${store.presBest.miss} revealed` : ' · clean run'}`
+    : `${PRES.length} presidents in order`;
+  const best = Object.entries(CARD_MODES).map(([id, m]) => ({ n: cardBest(id), label: m.label }))
+    .filter(x => x.n).sort((a, b) => b.n - a.n)[0];
+  const bits = [];
+  if (best) bits.push(`Cards ${best.n}/${CARD_LEN} · ${best.label}`);
+  if (store.shakesBest) bits.push(`List drill ${fmtTime(store.shakesBest.ms)}`);
+  const shakes = bits.length ? bits.join(' · ') : `${PLAYS.length} plays · ${CARD_LEN}-card rounds`;
+  const card = (id, icon, name, desc, prog) => `<button class="topic" data-app="${id}">
+    <span class="ticon" aria-hidden="true">${icon}</span>
+    <span class="tbody"><span class="tname">${name}</span><span class="tdesc">${desc}</span><span class="tprog">${prog}</span></span>
+  </button>`;
+  return `<div class="lmain home-main">
+    <h2>Choose a topic</h2>
+    <div class="topics">
+      ${card('countries', '🌍', 'World Geography', 'Countries, regions, and territories on the map.', world)}
+      ${card('presidents', '🏛️', 'US Presidents', 'Every president, in order, with terms and parties.', pres)}
+      ${card('shakespeare', '🎭', 'Shakespeare', 'Characters, plots, and titles for all 39 plays.', shakes)}
+    </div>
+  </div>`;
+}
+
+function renderHome() {
+  activeList = null;
+  document.body.dataset.lview = 'home';
+  panel.innerHTML = navHeadHtml() + homePanelHtml();
+  listmain.innerHTML = homeMainHtml();
+  window.scrollTo(0, 0);
+  listmain.scrollTop = 0;
+}
+
+// ---------------------------------------------------------------------------
+// App switcher (Home / World / Presidents / Shakespeare)
+// ---------------------------------------------------------------------------
+const APP_LABEL = { home: 'Home', countries: 'World', presidents: 'Presidents', shakespeare: 'Shakespeare' };
 function navHeadHtml() {
   const open = document.body.classList.contains('nav-open');
-  return `<div class="phead"><button class="navbtn" data-nav-toggle aria-label="Open menu" aria-expanded="${open}"><svg class="navicon" viewBox="0 0 16 12" aria-hidden="true" focusable="false"><rect x="0" y="0" width="16" height="2" rx="1"/><rect x="0" y="5" width="16" height="2" rx="1"/><rect x="0" y="10" width="16" height="2" rx="1"/></svg></button><span class="app">${APP_LABEL[app]}</span></div>`;
+  return `<div class="phead"><button class="homelogo" data-home aria-label="Study Hall home"><img src="favicon.svg" alt="" draggable="false"></button><button class="navbtn" data-nav-toggle aria-label="Open menu" aria-expanded="${open}"><svg class="navicon" viewBox="0 0 16 12" aria-hidden="true" focusable="false"><rect x="0" y="0" width="16" height="2" rx="1"/><rect x="0" y="5" width="16" height="2" rx="1"/><rect x="0" y="10" width="16" height="2" rx="1"/></svg></button><span class="app">${APP_LABEL[app]}</span></div>`;
 }
 
 function setNav(open) {
@@ -1219,30 +1297,47 @@ function setNav(open) {
 
 $('#navScrim').addEventListener('click', () => setNav(false));
 $('#navClose').addEventListener('click', () => setNav(false));
-panel.addEventListener('click', e => { if (e.target.closest('[data-nav-toggle]')) setNav(true); });
+panel.addEventListener('click', e => {
+  if (e.target.closest('[data-nav-toggle]')) setNav(true);
+  else if (e.target.closest('[data-home]')) setApp('home');
+});
+listmain.addEventListener('click', e => {
+  const b = e.target.closest('[data-app]');
+  if (b) setApp(b.dataset.app);
+});
 
 // Deep links: #world, #presidents and #shakespeare survive a refresh and can be shared.
-const APP_SLUG = { countries: 'world', presidents: 'presidents', shakespeare: 'shakespeare' };
+// A bare URL is the home page; choosing Home removes the hash again.
+const APP_SLUG = { home: '', countries: 'world', presidents: 'presidents', shakespeare: 'shakespeare' };
 const appFromHash = () => {
   const h = location.hash.replace(/^#\/?/, '');
-  return Object.keys(APP_SLUG).find(k => APP_SLUG[k] === h) || 'countries';
+  return Object.keys(APP_SLUG).find(k => h && APP_SLUG[k] === h) || 'home';
 };
 function syncHash(a) {
-  const h = '#' + APP_SLUG[a];
+  const slug = APP_SLUG[a];
+  if (!slug) {
+    if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+    return;
+  }
+  const h = '#' + slug;
   if (location.hash !== h) history.replaceState(null, '', h);
 }
 
 function setApp(a) {
-  if (!a || a === app) { syncHash(app); return; }
+  if (!a) a = 'home';
+  if (a === app) { syncHash(app); return; }
   app = a;
   document.body.dataset.app = a;
-  document.body.dataset.module = LIST_MODULES[a] ? 'list' : 'map';
+  document.body.dataset.module = a === 'home' ? 'home' : LIST_MODULES[a] ? 'list' : 'map';
   syncHash(a);
   // A quiz keeps running in the background while another topic is on screen.
   document.body.classList.toggle('quizzing', a === 'countries' && view === 'quiz');
   for (const b of document.querySelectorAll('#nav [data-app]')) b.classList.toggle('on', b.dataset.app === a);
   hideTip();
-  if (a === 'shakespeare') {
+  if (a === 'home') {
+    activeList = null;
+    renderHome();
+  } else if (a === 'shakespeare') {
     const st = listState.shakespeare;
     clearInterval(st.timer);
     st.qz = null;
@@ -2306,7 +2401,7 @@ if (window.visualViewport) {
 window.addEventListener('scroll', keepQuizAnchored, { passive: true });
 
 init();
-// Restore the topic from the URL (and canonicalise a bare URL to #world).
+// Restore the topic from the URL; a bare URL opens the home page.
 setApp(appFromHash());
 
 // Offline support. The first visit installs the worker; a later release waits until the
