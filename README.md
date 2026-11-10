@@ -18,6 +18,9 @@ The menu on the left switches between study topics:
 
 - **World Geography** — study every country region by region: quiz it by clicking the map or typing the name, mark it as learned, then quiz all your learned regions together. Regions and territories are defined in `REGION_DEFS` / `TERR_DEFS` at the top of the script.
 - **US Presidents** — type all 47 presidents in order, Sporcle-style. Surnames, full names, and common nicknames (`JFK`, `Ike`, `FDR`) all count, and near-miss typos are accepted. The list is defined in `PRESIDENT_DEFS`, where order in the array is the answer order. A study list shows every president with term years and party; best time is saved in localStorage.
+- **Shakespeare** — type all 39 plays in any order. Short forms (`Midsummer`, `Much Ado`, `Henry 5`) count, and near-miss typos are accepted. The canon is the 36 plays in the First Folio plus *Pericles*, *The Two Noble Kinsmen*, and *Edward III*; the list is defined in `PLAY_DEFS` with each play's first performance and type. A study list groups the plays by comedy, history, tragedy, and romance; best time is saved in localStorage.
+
+Presidents and Shakespeare share one list-quiz engine. `LIST_MODULES` holds each module's items and labels, and `ordered: true` (presidents) advances one item at a time while unordered modules (Shakespeare) accept any remaining item. Adding another list topic means adding a definition and a `LIST_MODULES` entry, not another quiz implementation.
 
 ## Map data
 

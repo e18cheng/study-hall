@@ -104,7 +104,7 @@ input[type=checkbox] { accent-color: var(--accent); width: 15px; height: 15px; m
 /* quiz */
 .qbar { display: flex; align-items: center; gap: 12px; font-variant-numeric: tabular-nums; color: var(--muted); }
 .qbar .back { margin: 0; }
-.qbar #qtime, .qbar #ptime { margin-left: auto; }
+.qbar #qtime, .qbar #ltime { margin-left: auto; }
 .prompt { font-size: 22px; line-height: 1.25; margin: 14px 0 10px; font-weight: 500; }
 .prompt b { font-weight: 750; }
 .qform { display: flex; gap: 8px; }
@@ -191,33 +191,35 @@ body.nav-open #nav { transform: none; visibility: visible; transition: transform
 #nav button[data-app].on { background: var(--chip); box-shadow: inset 0 0 0 1px var(--border); }
 #nav button[data-app] .lbl { font-size: 13px; font-weight: 600; letter-spacing: 0; }
 @media (prefers-reduced-motion: reduce) { #nav, #navScrim { transition: none; } }
-body[data-app="presidents"] #mapwrap { display: none; }
-/* Presidents reuse the world layout: controls and status in the left panel, the president
+body[data-module="list"] #mapwrap { display: none; }
+/* List quizzes reuse the world layout: controls and status in the left panel, the answer
    list in the main area where the map sits for countries. */
-#presmain { display: none; min-width: 0; min-height: 0; overflow: auto; background: var(--bg); }
-body[data-app="presidents"] #presmain { display: block; }
-.pmain { max-width: 980px; margin: 0 auto; padding: 24px 28px 48px; }
-.pmain h3:first-child { margin-top: 0; }
-.plegend { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; }
-.plegend li { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--muted); }
+#listmain { display: none; min-width: 0; min-height: 0; overflow: auto; background: var(--bg); }
+body[data-module="list"] #listmain { display: block; }
+.lmain { max-width: 980px; margin: 0 auto; padding: 24px 28px 48px; }
+.lmain h3:first-child { margin-top: 0; }
+.llegend { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; }
+.llegend li { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--muted); }
 
-/* presidents */
+/* list rows */
 /* Multi-column, not grid: rows read top-down the first column, then the next. */
-.prez { list-style: none; margin: 0; padding: 0; columns: 2; column-gap: 18px; }
-.prez > li { break-inside: avoid; }
-@media (max-width: 720px) { .prez { columns: 1; } }
-.prow { display: flex; align-items: center; gap: 7px; padding: 4px 8px; border-radius: 6px; min-height: 27px; }
-.prow .pn { width: 20px; text-align: right; color: var(--muted); font-size: 11.5px; font-variant-numeric: tabular-nums; flex: none; }
-.prow .pname { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.prow .py { margin-left: auto; color: var(--muted); font-size: 11.5px; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.prow .pline { flex: 1; border-bottom: 1px dashed var(--border); height: .9em; opacity: .55; }
-.prow.cur { background: color-mix(in srgb, var(--accent) 12%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent); }
-.prow.cur .pn { color: var(--accent); font-weight: 700; }
-.prow.miss .pname { color: var(--bad); }
-.pdot { width: 7px; height: 7px; border-radius: 50%; background: var(--pc, var(--muted)); flex: none; }
+.lrows { list-style: none; margin: 0; padding: 0; columns: 2; column-gap: 18px; }
+.lrows > li { break-inside: avoid; }
+@media (max-width: 720px) { .lrows { columns: 1; } }
+.lrow { display: flex; align-items: center; gap: 7px; padding: 4px 8px; border-radius: 6px; min-height: 27px; }
+.lrow .ln { width: 20px; text-align: right; color: var(--muted); font-size: 11.5px; font-variant-numeric: tabular-nums; flex: none; }
+.lrow .lname { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lrow .lmeta { margin-left: auto; color: var(--muted); font-size: 11.5px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.lrow .lline { flex: 1; border-bottom: 1px dashed var(--border); height: .9em; opacity: .55; }
+.lrow.cur { background: color-mix(in srgb, var(--accent) 12%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent); }
+.lrow.cur .ln { color: var(--accent); font-weight: 700; }
+.lrow.miss .lname { color: var(--bad); }
+.ldot { width: 7px; height: 7px; border-radius: 50%; background: var(--pc, var(--muted)); flex: none; }
 .pty-independent { --pc: #8a8f98; } .pty-federalist { --pc: #9b6bd6; }
 .pty-democratic-republican { --pc: #2f9e8f; } .pty-democratic { --pc: #2f6fde; }
 .pty-whig { --pc: #d8a13a; } .pty-republican { --pc: #d64242; } .pty-national-union { --pc: #e07a30; }
+.cat-comedy { --pc: #2f9e8f; } .cat-history { --pc: #d8a13a; }
+.cat-tragedy { --pc: #d64242; } .cat-romance { --pc: #9b6bd6; }
 
 @media (max-width: 760px) {
   body { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); }
@@ -245,25 +247,25 @@ body[data-app="presidents"] #presmain { display: block; }
   body:not(.quizzing) .pfoot { order: 5; position: sticky; bottom: 0; background: var(--panel); padding-bottom: calc(10px + env(safe-area-inset-bottom)); box-shadow: 0 -6px 16px rgba(0,0,0,.07); }
   /* Presidents outside the quiz: the panel flattens, so the study list follows the
      sidebar controls and the action buttons stay pinned at the bottom. */
-  body[data-app="presidents"]:not(.quizzing) #presmain { order: 3; overflow: visible; }
-  body[data-app="presidents"]:not(.quizzing) #presmain .pmain { padding: 0 16px 16px; }
+  body[data-module="list"]:not(.quizzing) #listmain { order: 3; overflow: visible; }
+  body[data-module="list"]:not(.quizzing) #listmain .lmain { padding: 0 16px 16px; }
   /* Presidents quiz: a fixed shell. The header and the input stay put and the list scrolls
      between them, instead of the whole page scrolling under a floating input. */
   /* --app-vh is kept in sync with the visual viewport: Safari shrinks that for the keyboard
      but leaves the layout viewport (and 100dvh) alone, then pans the page to reveal the
      focused input, which dragged the whole shell up. */
-  body[data-app="presidents"][data-pview="quiz"] { display: flex; flex-direction: column; height: 100vh; height: var(--app-vh, 100vh); min-height: 0; overflow: hidden; background: var(--panel); }
+  body[data-module="list"][data-lview="quiz"] { display: flex; flex-direction: column; height: 100vh; height: var(--app-vh, 100vh); min-height: 0; overflow: hidden; background: var(--panel); }
   /* Flatten the panel so the prompt, the scrolling list and the input can stack in that
-     order; the list itself lives in #presmain. */
-  body[data-app="presidents"][data-pview="quiz"] #panel { display: contents; }
-  body[data-app="presidents"][data-pview="quiz"] .phead { order: 0; }
+     order; the list itself lives in #listmain. */
+  body[data-module="list"][data-lview="quiz"] #panel { display: contents; }
+  body[data-module="list"][data-lview="quiz"] .phead { order: 0; }
   /* Undo the non-quiz `display: contents` so the prompt block keeps its own box and order. */
-  body[data-app="presidents"][data-pview="quiz"] .pscroll { order: 1; display: flex; flex-direction: column; flex: none; overflow: visible; }
-  body[data-app="presidents"][data-pview="quiz"] .pbody { flex: none; overflow: visible; display: block; }
-  body[data-app="presidents"][data-pview="quiz"] #presmain { order: 2; display: block; flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; background: var(--panel); }
-  body[data-app="presidents"][data-pview="quiz"] #presmain .pmain { padding: 0 16px; }
-  body[data-app="presidents"][data-pview="quiz"] #plist { columns: 1; }
-  body[data-app="presidents"][data-pview="quiz"] .pfoot { order: 3; position: static; flex: none; padding-bottom: calc(10px + env(safe-area-inset-bottom)); }
+  body[data-module="list"][data-lview="quiz"] .pscroll { order: 1; display: flex; flex-direction: column; flex: none; overflow: visible; }
+  body[data-module="list"][data-lview="quiz"] .pbody { flex: none; overflow: visible; display: block; }
+  body[data-module="list"][data-lview="quiz"] #listmain { order: 2; display: block; flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; background: var(--panel); }
+  body[data-module="list"][data-lview="quiz"] #listmain .lmain { padding: 0 16px; }
+  body[data-module="list"][data-lview="quiz"] #llist { columns: 1; }
+  body[data-module="list"][data-lview="quiz"] .pfoot { order: 3; position: static; flex: none; padding-bottom: calc(10px + env(safe-area-inset-bottom)); }
   .btns { display: flex; flex-wrap: wrap; }
   .btns > * { flex: 1 1 0; min-width: 28%; padding: 10px 8px; }
   .btns > .full { flex-basis: 100%; }
@@ -279,7 +281,7 @@ body[data-app="presidents"] #presmain { display: block; }
 }
 </style>
 </head>
-<body data-app="countries">
+<body data-app="countries" data-module="map">
 <div id="updateBanner" hidden>
   <span>A new version is available.</span>
   <button type="button" id="updateReload">Reload</button>
@@ -293,9 +295,12 @@ body[data-app="presidents"] #presmain { display: block; }
   <button data-app="presidents" aria-label="US Presidents">
     <span aria-hidden="true">🏛️</span><span class="lbl">Presidents</span>
   </button>
+  <button data-app="shakespeare" aria-label="Shakespeare">
+    <span aria-hidden="true">🎭</span><span class="lbl">Shakespeare</span>
+  </button>
 </nav>
 <aside id="panel"></aside>
-<main id="presmain"></main>
+<main id="listmain"></main>
 <div id="mapwrap" role="main">
   <svg id="map"></svg>
   <div id="tip"></div>
@@ -429,7 +434,8 @@ function save() { try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); 
 // State
 // ---------------------------------------------------------------------------
 let view = 'home';     // home | study | quiz | results
-let app = 'countries'; // countries | presidents
+let app = 'countries'; // countries | presidents | shakespeare
+let activeList = null; // list module currently on screen ('presidents' | 'shakespeare')
 let pool = [];         // country codes for study/quiz/results
 let active = new Set();
 let q = null;          // current quiz
@@ -440,7 +446,7 @@ const FEATS = new Map(); // code -> feature record
 let SOV = [];            // records for sovereign countries
 
 const $ = (s, r = document) => r.querySelector(s);
-const panel = $('#panel'), presmain = $('#presmain'), tip = $('#tip'), mapwrap = $('#mapwrap');
+const panel = $('#panel'), listmain = $('#listmain'), tip = $('#tip'), mapwrap = $('#mapwrap');
 const svg = d3.select('#map'), sv = svg.node();
 const zl = svg.append('g');
 const gC = zl.append('g'), gM = zl.append('g'), gL = zl.append('g'), gFx = zl.append('g');
@@ -790,7 +796,7 @@ function setView(v) {
 }
 
 function render() {
-  if (app === 'presidents') return renderPres();
+  if (LIST_MODULES[app]) { activeList = app; return renderList(LIST_MODULES[app]); }
   const scroll = $('.pscroll', panel)?.scrollTop || 0;
   panel.innerHTML = navHeadHtml() + (view === 'home' ? homeHtml() : view === 'study' ? studyHtml() : view === 'quiz' ? quizHtml() : resultsHtml());
   if (view === 'home') {
@@ -1001,7 +1007,7 @@ panel.addEventListener('change', e => {
   } else if ('labels' in t.dataset) { store.labels = t.checked; save(); rescale(); }
   else if ('hard' in t.dataset) { store.hard = t.checked; save(); }
 });
-panel.addEventListener('submit', e => { e.preventDefault(); if (app === 'presidents') submitPres(); else submitGuess(); });
+panel.addEventListener('submit', e => { e.preventDefault(); if (LIST_MODULES[app]) submitList(LIST_MODULES[app]); else submitGuess(); });
 panel.addEventListener('pointerover', e => {
   const b = e.target.closest('[data-act=locate]');
   if (hovCode) setHover(hovCode, false);
@@ -1136,7 +1142,7 @@ function finish() {
 // ---------------------------------------------------------------------------
 // App switcher (World / Presidents)
 // ---------------------------------------------------------------------------
-const APP_LABEL = { countries: 'World', presidents: 'Presidents' };
+const APP_LABEL = { countries: 'World', presidents: 'Presidents', shakespeare: 'Shakespeare' };
 function navHeadHtml() {
   const open = document.body.classList.contains('nav-open');
   return `<div class="phead"><button class="navbtn" data-nav-toggle aria-label="Open menu" aria-expanded="${open}"><svg class="navicon" viewBox="0 0 16 12" aria-hidden="true" focusable="false"><rect x="0" y="0" width="16" height="2" rx="1"/><rect x="0" y="5" width="16" height="2" rx="1"/><rect x="0" y="10" width="16" height="2" rx="1"/></svg></button><span class="app">${APP_LABEL[app]}</span></div>`;
@@ -1153,9 +1159,12 @@ $('#navScrim').addEventListener('click', () => setNav(false));
 $('#navClose').addEventListener('click', () => setNav(false));
 panel.addEventListener('click', e => { if (e.target.closest('[data-nav-toggle]')) setNav(true); });
 
-// Deep links: #world and #presidents survive a refresh and can be shared.
-const APP_SLUG = { countries: 'world', presidents: 'presidents' };
-const appFromHash = () => (location.hash.replace(/^#\/?/, '') === 'presidents' ? 'presidents' : 'countries');
+// Deep links: #world, #presidents and #shakespeare survive a refresh and can be shared.
+const APP_SLUG = { countries: 'world', presidents: 'presidents', shakespeare: 'shakespeare' };
+const appFromHash = () => {
+  const h = location.hash.replace(/^#\/?/, '');
+  return Object.keys(APP_SLUG).find(k => APP_SLUG[k] === h) || 'countries';
+};
 function syncHash(a) {
   const h = '#' + APP_SLUG[a];
   if (location.hash !== h) history.replaceState(null, '', h);
@@ -1165,13 +1174,17 @@ function setApp(a) {
   if (!a || a === app) { syncHash(app); return; }
   app = a;
   document.body.dataset.app = a;
+  document.body.dataset.module = LIST_MODULES[a] ? 'list' : 'map';
   syncHash(a);
-  // A country quiz keeps running in the background; the presidents quiz has its own timer.
+  // A quiz keeps running in the background while another topic is on screen.
   document.body.classList.toggle('quizzing', a === 'countries' && view === 'quiz');
   for (const b of document.querySelectorAll('#nav [data-app]')) b.classList.toggle('on', b.dataset.app === a);
   hideTip();
-  if (a === 'presidents') renderPres();
-  else {
+  if (LIST_MODULES[a]) {
+    activeList = a;
+    renderList(LIST_MODULES[a]);
+  } else {
+    activeList = null;
     render();
     // The map had zero size while hidden, so re-project once it is visible again.
     requestAnimationFrame(() => {
@@ -1194,8 +1207,12 @@ $('#nav').addEventListener('click', e => {
 window.addEventListener('hashchange', () => setApp(appFromHash()));
 
 // ---------------------------------------------------------------------------
-// US Presidents — type them in order
+// List quizzes (presidents, Shakespeare)
 // ---------------------------------------------------------------------------
+// One engine for fixed-answer lists. A module supplies the items and a few labels.
+// Ordered modules advance one item at a time (presidents); unordered modules accept
+// any remaining item (plays).
+
 // [name, years in office, party, extra accepted answers separated by |]
 const PRESIDENT_DEFS = [
   ['George Washington', '1789–1797', 'Independent', 'washington'],
@@ -1246,130 +1263,215 @@ const PRESIDENT_DEFS = [
   ['Joe Biden', '2021–2025', 'Democratic', 'biden|joseph biden'],
   ['Donald Trump', '2025–', 'Republican', 'trump'],
 ];
+
 const PRES = PRESIDENT_DEFS.map(([name, years, party, aliases], i) => ({
-  n: i + 1, name, years, party,
+  n: i + 1, name, meta: years, tip: party,
   cls: 'pty-' + party.toLowerCase().replace(/[^a-z]+/g, '-'),
   forms: [name, ...aliases.split('|')].filter(Boolean).map(norm),
 }));
-
-let pv = 'home';   // home | quiz | results
-let pqz = null;    // { i, wrong, revealed, t0, elapsed, done }
-let ptimer = null;
-
-function presRow(p, i, showAll) {
-  if (showAll) {
-    return `<li class="prow done" title="${esc(p.party)}"><span class="pn">${p.n}</span>
-      <span class="pdot ${p.cls}"></span><span class="pname">${esc(p.name)}</span><span class="py">${esc(p.years)}</span></li>`;
-  }
-  const done = !!pqz && i < pqz.i;
-  const cur = !!pqz && i === pqz.i;
-  if (!done) {
-    return `<li class="prow todo${cur ? ' cur' : ''}"><span class="pn">${p.n}</span><span class="pline"></span></li>`;
-  }
-  const miss = pqz.revealed.has(i);
-  return `<li class="prow done${cur ? ' cur' : ''}${miss ? ' miss' : ''}" title="${esc(p.party)}">
-    <span class="pn">${p.n}</span><span class="pdot ${p.cls}"></span>
-    <span class="pname">${esc(p.name)}</span><span class="py">${esc(p.years)}</span></li>`;
-}
-const presRows = showAll => PRES.map((p, i) => presRow(p, i, showAll)).join('');
-
-function presFb(html, cls) { const el = $('#pfb'); if (el) { el.innerHTML = html; el.className = 'fb ' + cls; } }
-
-const PARTIES = [...new Set(PRES.map(p => p.party))].map(name => ({
+const PARTIES = [...new Set(PRES.map(p => p.tip))].map(name => ({
   name, cls: 'pty-' + name.toLowerCase().replace(/[^a-z]+/g, '-'),
 }));
 
-function partyKeyHtml() {
-  return `<h3>Party key</h3><ul class="plegend">${PARTIES.map(p =>
-    `<li><span class="pdot ${p.cls}"></span>${esc(p.name)}</li>`).join('')}</ul>`;
+// The 39-play canon: the 36 in the First Folio plus Pericles, The Two Noble Kinsmen
+// and Edward III. [name, first performance, type, extra accepted answers separated by |]
+const PLAY_DEFS = [
+  // Comedies
+  ['The Two Gentlemen of Verona', '1590–91', 'Comedy', 'two gentlemen|two gents'],
+  ['The Taming of the Shrew', '1590–91', 'Comedy', 'shrew'],
+  ['The Comedy of Errors', '1592–93', 'Comedy', 'comedy of errors'],
+  ["Love's Labour's Lost", '1594–95', 'Comedy', 'loves labors lost|lll'],
+  ["A Midsummer Night's Dream", '1595–96', 'Comedy', 'midsummer|midsummer nights dream|msnd'],
+  ['The Merchant of Venice', '1596–97', 'Comedy', 'merchant of venice'],
+  ['The Merry Wives of Windsor', '1597–98', 'Comedy', 'merry wives'],
+  ['Much Ado About Nothing', '1598–99', 'Comedy', 'much ado'],
+  ['As You Like It', '1599–1600', 'Comedy', 'asyoulikeit'],
+  ['Twelfth Night', '1601–02', 'Comedy', '12th night|twelfth night or what you will'],
+  ["All's Well That Ends Well", '1604–05', 'Comedy', 'alls well'],
+  ['Measure for Measure', '1604–05', 'Comedy', 'measure'],
+  ['Troilus and Cressida', '1601–02', 'Comedy', 'troilus & cressida'],
+  // Histories
+  ['Henry VI, Part 1', '1591–92', 'History', '1 henry vi|henry 6 part 1|henry the sixth part 1|henry vi part one'],
+  ['Henry VI, Part 2', '1590–91', 'History', '2 henry vi|henry 6 part 2|henry the sixth part 2|henry vi part two'],
+  ['Henry VI, Part 3', '1590–91', 'History', '3 henry vi|henry 6 part 3|henry the sixth part 3|henry vi part three'],
+  ['Richard III', '1592–93', 'History', 'richard 3'],
+  ['King John', '1594–96', 'History', 'john'],
+  ['Richard II', '1595–96', 'History', 'richard 2'],
+  ['Henry IV, Part 1', '1596–97', 'History', '1 henry iv|henry 4 part 1|henry the fourth part 1|henry iv part one'],
+  ['Henry IV, Part 2', '1597–98', 'History', '2 henry iv|henry 4 part 2|henry the fourth part 2|henry iv part two'],
+  ['Henry V', '1598–99', 'History', 'henry 5|henry the fifth'],
+  ['Henry VIII', '1612–13', 'History', 'henry 8|henry the eighth'],
+  ['Edward III', '1592–93', 'History', 'edward 3|edward the third'],
+  // Tragedies
+  ['Titus Andronicus', '1591–92', 'Tragedy', 'titus'],
+  ['Romeo and Juliet', '1594–95', 'Tragedy', 'romeo & juliet'],
+  ['Julius Caesar', '1599–1600', 'Tragedy', 'caesar'],
+  ['Hamlet', '1600–01', 'Tragedy', 'hamlet prince of denmark'],
+  ['Othello', '1603–04', 'Tragedy', 'othello moor of venice'],
+  ['King Lear', '1605–06', 'Tragedy', 'lear'],
+  ['Macbeth', '1605–06', 'Tragedy', 'macbeth'],
+  ['Antony and Cleopatra', '1606–07', 'Tragedy', 'antony & cleopatra|anthony and cleopatra'],
+  ['Coriolanus', '1607–08', 'Tragedy', 'coriolanus'],
+  ['Timon of Athens', '1605–08', 'Tragedy', 'timon'],
+  // Late romances
+  ['Pericles', '1607–08', 'Romance', 'pericles prince of tyre'],
+  ['Cymbeline', '1609–10', 'Romance', 'cymbeline'],
+  ["The Winter's Tale", '1610–11', 'Romance', 'winters tale'],
+  ['The Tempest', '1611–12', 'Romance', 'tempest'],
+  ['The Two Noble Kinsmen', '1613–14', 'Romance', 'two noble kinsmen'],
+];
+
+const PLAYS = PLAY_DEFS.map(([name, years, type, aliases], i) => ({
+  n: i + 1, name, meta: years, tip: type,
+  cls: 'cat-' + type.toLowerCase().replace(/[^a-z]+/g, '-'),
+  forms: [name, ...aliases.split('|')].filter(Boolean).map(norm),
+}));
+const PLAY_TYPES = [...new Set(PLAYS.map(p => p.tip))].map(name => ({
+  name, cls: 'cat-' + name.toLowerCase().replace(/[^a-z]+/g, '-'),
+}));
+
+const LIST_MODULES = {
+  presidents: {
+    id: 'presidents', label: 'Presidents', title: 'US Presidents', noun: 'president',
+    ordered: true, items: PRES, bestKey: 'presBest',
+    blurb: `Type all ${PRES.length} presidents in order. A surname is enough; full names and common nicknames work too.`,
+    legendTitle: 'Party key', legend: PARTIES,
+    notesHtml: `<h3>Good to know</h3><p class="muted small">${PRES.length} presidencies, ${new Set(PRES.map(p => p.name)).size} people — Cleveland and Trump each served two non-consecutive terms.</p>`,
+    promptHtml: (cfg, st) => st.qz.i < cfg.items.length ? `Type president <b>#${cfg.items[st.qz.i].n}</b>` : 'All of them!',
+    studyHeading: 'Study list', resultsHeading: 'All presidents',
+  },
+  shakespeare: {
+    id: 'shakespeare', label: 'Shakespeare', title: 'Shakespeare', noun: 'play',
+    ordered: false, items: PLAYS, bestKey: 'shakesBest',
+    blurb: `Type all ${PLAYS.length} plays in any order. Short forms work: “Midsummer”, “Much Ado”, “Henry 5”.`,
+    legendTitle: 'Play types', legend: PLAY_TYPES,
+    notesHtml: `<h3>Good to know</h3><p class="muted small">The canon is 39 plays: the 36 in the First Folio, plus Pericles, The Two Noble Kinsmen, and Edward III. Play types are approximate — the late romances are often grouped with the comedies.</p>`,
+    promptHtml: (cfg, st) => st.qz.found.size < cfg.items.length ? 'Type any Shakespeare play' : 'All of them!',
+    studyHeading: 'Study list', resultsHeading: 'All plays',
+  },
+};
+
+const listState = {};
+for (const id of Object.keys(LIST_MODULES)) listState[id] = { view: 'home', qz: null, timer: null };
+
+const listSt = cfg => listState[cfg.id];
+const fuzzyLimit = f => f.length >= 9 ? 2 : f.length >= 5 ? 1 : 0;
+
+function listLegendHtml(cfg) {
+  return `<h3>${esc(cfg.legendTitle)}</h3><ul class="llegend">${cfg.legend.map(g =>
+    `<li><span class="ldot ${g.cls}"></span>${esc(g.name)}</li>`).join('')}</ul>`;
 }
 
-function presHomeHtml() {
-  const b = store.presBest;
+function listRow(cfg, item, i) {
+  const st = listSt(cfg), qz = st.qz;
+  const quiz = st.view === 'quiz' && qz;
+  if (!quiz) {
+    return `<li class="lrow done" title="${esc(item.tip)}"><span class="ln">${item.n}</span>
+      <span class="ldot ${item.cls}"></span><span class="lname">${esc(item.name)}</span><span class="lmeta">${esc(item.meta)}</span></li>`;
+  }
+  const done = cfg.ordered ? i < qz.i : qz.found.has(i);
+  const cur = cfg.ordered && i === qz.i;
+  if (!done) {
+    return `<li class="lrow todo${cur ? ' cur' : ''}"><span class="ln">${item.n}</span><span class="lline"></span></li>`;
+  }
+  const miss = qz.revealed.has(i);
+  return `<li class="lrow done${cur ? ' cur' : ''}${miss ? ' miss' : ''}" title="${esc(item.tip)}">
+    <span class="ln">${item.n}</span><span class="ldot ${item.cls}"></span>
+    <span class="lname">${esc(item.name)}</span><span class="lmeta">${esc(item.meta)}</span></li>`;
+}
+const listRowsHtml = cfg => cfg.items.map((it, i) => listRow(cfg, it, i)).join('');
+
+function listFb(html, cls) { const el = $('#lfb'); if (el) { el.innerHTML = html; el.className = 'fb ' + cls; } }
+function shakeEl(el) { el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); }
+
+function listHomeHtml(cfg) {
+  const best = store[cfg.bestKey];
   return `<div class="pscroll"><div class="ptitle">
-    <h1>US Presidents</h1>
-    <p class="muted small">Type all ${PRES.length} presidents in order. A surname is enough; full names and common nicknames work too.</p>
-    ${b ? `<p class="small">Your best: <b>${fmtTime(b.ms)}</b> · ${b.miss} revealed</p>` : ''}
+    <h1>${esc(cfg.title)}</h1>
+    <p class="muted small">${cfg.blurb}</p>
+    ${best ? `<p class="small">Your best: <b>${fmtTime(best.ms)}</b> · ${best.miss} revealed</p>` : ''}
   </div><div class="pbody">
-    ${partyKeyHtml()}
-    <h3>Good to know</h3>
-    <p class="muted small">${PRES.length} presidencies, ${new Set(PRES.map(p => p.name)).size} people — Cleveland and Trump each served two non-consecutive terms.</p>
+    ${listLegendHtml(cfg)}
+    ${cfg.notesHtml || ''}
   </div></div><div class="pfoot"><div class="btns">
     <button class="btn primary full" data-pact="start">Start typing quiz</button>
   </div></div>`;
 }
 
-function presHomeMainHtml() {
-  return `<div class="pmain"><h3>Study list</h3><ul class="prez">${presRows(true)}</ul></div>`;
+function listHomeMainHtml(cfg) {
+  return `<div class="lmain"><h3>${esc(cfg.studyHeading)}</h3><ul class="lrows">${listRowsHtml(cfg)}</ul></div>`;
 }
 
-function presQuizHtml() {
+function listQuizHtml(cfg) {
   return `<div class="pscroll"><div class="pbody">
-    <div class="qbar"><button class="back" data-pact="quit">✕ Quit</button><span id="pprog"></span><span id="ptime">0:00</span></div>
-    <div class="bar"><i id="pbar"></i></div>
-    <div class="prompt" id="pprompt"></div>
-    <div class="fb" id="pfb"></div>
+    <div class="qbar"><button class="back" data-pact="quit">✕ Quit</button><span id="lprog"></span><span id="ltime">0:00</span></div>
+    <div class="bar"><i id="lbar"></i></div>
+    <div class="prompt" id="lprompt"></div>
+    <div class="fb" id="lfb"></div>
   </div></div><div class="pfoot">
-    <form class="qform" autocomplete="off"><input id="pin" name="answer" autocomplete="off" autocapitalize="words" autocorrect="off" spellcheck="false" enterkeyhint="done" placeholder="Type your answer…"><button class="btn primary">Check</button></form>
-    <div class="qrow"><div class="tally" id="ptally"></div><button class="btn ghost" data-pact="reveal">Reveal</button></div>
+    <form class="qform" autocomplete="off"><input id="lin" name="answer" autocomplete="off" autocapitalize="words" autocorrect="off" spellcheck="false" enterkeyhint="done" placeholder="Type your answer…"><button class="btn primary">Check</button></form>
+    <div class="qrow"><div class="tally" id="ltally"></div><button class="btn ghost" data-pact="reveal">Reveal</button></div>
   </div>`;
 }
 
-function presQuizMainHtml() {
-  return `<div class="pmain"><ul class="prez" id="plist">${presRows(false)}</ul></div>`;
+function listQuizMainHtml(cfg) {
+  return `<div class="lmain"><ul class="lrows" id="llist">${listRowsHtml(cfg)}</ul></div>`;
 }
 
-function presResultsHtml() {
-  const miss = pqz.revealed.size;
+function listResultsHtml(cfg) {
+  const qz = listSt(cfg).qz, miss = qz.revealed.size, total = cfg.items.length;
   return `<div class="pscroll"><div class="ptitle">
-    <h1>All ${PRES.length} — done</h1>
-    <div class="score">${fmtTime(pqz.elapsed)}${pqz.newBest ? '<span class="newbest">New best</span>' : ''}</div>
-    <p class="muted">${PRES.length - miss} of ${PRES.length} typed without revealing${miss ? ` · ${miss} revealed` : ' · clean run'}</p>
+    <h1>All ${total} — done</h1>
+    <div class="score">${fmtTime(qz.elapsed)}${qz.newBest ? '<span class="newbest">New best</span>' : ''}</div>
+    <p class="muted">${total - miss} of ${total} typed without revealing${miss ? ` · ${miss} revealed` : ' · clean run'}</p>
   </div><div class="pbody">
-    ${partyKeyHtml()}
+    ${listLegendHtml(cfg)}
   </div></div><div class="pfoot"><div class="btns">
     <button class="btn primary full" data-pact="start">Play again</button>
     <button class="btn ghost full" data-pact="list">Back to study list</button>
   </div></div>`;
 }
 
-function presResultsMainHtml() {
-  return `<div class="pmain"><h3>All presidents</h3><ul class="prez">${presRows(true)}</ul></div>`;
+function listResultsMainHtml(cfg) {
+  return `<div class="lmain"><h3>${esc(cfg.resultsHeading)}</h3><ul class="lrows">${listRowsHtml(cfg)}</ul></div>`;
 }
 
-function renderPres() {
-  document.body.dataset.pview = pv;
+function renderList(cfg) {
+  const st = listSt(cfg);
+  document.body.dataset.lview = st.view;
   const head = navHeadHtml();
-  if (pv === 'quiz') {
-    panel.innerHTML = head + presQuizHtml();
-    presmain.innerHTML = presQuizMainHtml();
-  } else if (pv === 'home') {
-    panel.innerHTML = head + presHomeHtml();
-    presmain.innerHTML = presHomeMainHtml();
+  if (st.view === 'quiz') {
+    panel.innerHTML = head + listQuizHtml(cfg);
+    listmain.innerHTML = listQuizMainHtml(cfg);
+  } else if (st.view === 'home') {
+    panel.innerHTML = head + listHomeHtml(cfg);
+    listmain.innerHTML = listHomeMainHtml(cfg);
   } else {
-    panel.innerHTML = head + presResultsHtml();
-    presmain.innerHTML = presResultsMainHtml();
+    panel.innerHTML = head + listResultsHtml(cfg);
+    listmain.innerHTML = listResultsMainHtml(cfg);
   }
   window.scrollTo(0, 0);
-  presmain.scrollTop = 0;
-  if (pv === 'quiz') { updatePresUI(); $('#pin')?.focus(); }
+  listmain.scrollTop = 0;
+  if (st.view === 'quiz') { updateListUI(cfg); $('#lin')?.focus(); }
 }
 
-function updatePresUI() {
-  if (!pqz) return;
-  const p = PRES[Math.min(pqz.i, PRES.length - 1)];
+function updateListUI(cfg) {
+  const st = listSt(cfg), qz = st.qz;
+  if (!qz) return;
+  const total = cfg.items.length;
+  const found = cfg.ordered ? Math.min(qz.i, total) : qz.found.size;
   const set = (id, txt) => { const el = $('#' + id); if (el) el.textContent = txt; };
-  set('pprog', `${Math.min(pqz.i + 1, PRES.length)} / ${PRES.length}`);
-  const bar = $('#pbar'); if (bar) bar.style.width = (100 * pqz.i / PRES.length) + '%';
-  const prompt = $('#pprompt');
-  if (prompt) prompt.innerHTML = pqz.i < PRES.length ? `Type president <b>#${p.n}</b>` : 'All of them!';
-  const tally = $('#ptally');
-  if (tally) tally.innerHTML = `<span title="Revealed"><i class="dot rx"></i>${pqz.revealed.size}</span><span title="Wrong guesses"><i class="dot r3"></i>${pqz.wrong}</span>`;
-  const list = $('#plist');
+  set('lprog', `${cfg.ordered ? Math.min(found + 1, total) : found} / ${total}`);
+  const bar = $('#lbar'); if (bar) bar.style.width = (100 * found / total) + '%';
+  const prompt = $('#lprompt');
+  if (prompt) prompt.innerHTML = cfg.promptHtml(cfg, st);
+  const tally = $('#ltally');
+  if (tally) tally.innerHTML = `<span title="Revealed"><i class="dot rx"></i>${qz.revealed.size}</span><span title="Wrong guesses"><i class="dot r3"></i>${qz.wrong}</span>`;
+  const list = $('#llist');
   if (list) {
-    list.innerHTML = presRows(false);
-    // The list may be its own scroller (narrow screens) or sit inside #presmain (wide ones).
-    const scroller = list.closest('#presmain') || list;
+    list.innerHTML = listRowsHtml(cfg);
+    // The list may be its own scroller (narrow screens) or sit inside #listmain (wide ones).
+    const scroller = list.closest('#listmain') || list;
     if (scroller.scrollHeight > scroller.clientHeight + 1) {
       const sr = scroller.getBoundingClientRect(), cur = list.querySelector('.cur');
       if (cur) {
@@ -1382,74 +1484,146 @@ function updatePresUI() {
   }
 }
 
-function presMatch(guess, p) {
-  if (p.forms.includes(guess)) return true;
-  // An exact name of some other president is wrong, no fuzzy credit (Adams ≠ Adams' typo).
-  if (PRES.some(x => x !== p && x.forms.includes(guess))) return false;
-  return p.forms.some(f => lev(guess, f) <= (f.length >= 9 ? 2 : f.length >= 5 ? 1 : 0));
+function listMatchOrdered(cfg, guess, idx) {
+  const item = cfg.items[idx];
+  if (item.forms.includes(guess)) return { idx };
+  // An exact name of some other item is wrong, no fuzzy credit (Adams ≠ Adams' typo).
+  if (cfg.items.some((x, j) => j !== idx && x.forms.includes(guess))) return { wrong: true };
+  if (item.forms.some(f => lev(guess, f) <= fuzzyLimit(f))) return { idx };
+  return { wrong: true };
 }
 
-function startPres() {
-  clearInterval(ptimer);
-  pqz = { i: 0, wrong: 0, revealed: new Set(), t0: Date.now(), elapsed: 0, done: false };
-  pv = 'quiz';
-  renderPres();
-  ptimer = setInterval(() => { const el = $('#ptime'); if (el) el.textContent = fmtTime(Date.now() - pqz.t0); }, 500);
-  $('#pin')?.focus();
+function listMatchUnordered(cfg, guess, found) {
+  const exact = [];
+  cfg.items.forEach((it, i) => { if (it.forms.includes(guess)) exact.push(i); });
+  if (exact.length) {
+    const i = exact.find(i => !found.has(i));
+    return i === undefined ? { already: exact[0] } : { idx: i };
+  }
+  // Fuzzy only for typos, and only when one item is clearly the closest.
+  let best = null;
+  cfg.items.forEach((it, i) => {
+    for (const f of it.forms) {
+      const d = lev(guess, f);
+      if (d > fuzzyLimit(f)) continue;
+      if (!best || d < best.d) best = { idx: i, d, amb: false };
+      else if (d === best.d && i !== best.idx) best.amb = true;
+    }
+  });
+  if (!best) return { wrong: true };
+  if (best.amb) return { ambiguous: true };
+  return found.has(best.idx) ? { already: best.idx } : { idx: best.idx };
 }
 
-function submitPres() {
-  if (!pqz || pqz.done) return;
-  const inp = $('#pin'); if (!inp) return;
+function startList(cfg) {
+  const st = listSt(cfg);
+  clearInterval(st.timer);
+  st.qz = { i: 0, wrong: 0, revealed: new Set(), found: new Set(), t0: Date.now(), elapsed: 0, done: false, newBest: false };
+  st.view = 'quiz';
+  renderList(cfg);
+  st.timer = setInterval(() => {
+    if (activeList !== cfg.id) return;
+    const el = $('#ltime'); if (el) el.textContent = fmtTime(Date.now() - st.qz.t0);
+  }, 500);
+  $('#lin')?.focus();
+}
+
+function submitList(cfg) {
+  const st = listSt(cfg), qz = st.qz;
+  if (!qz || qz.done) return;
+  const inp = $('#lin'); if (!inp) return;
   const guess = norm(inp.value);
   if (!guess) return;
-  const p = PRES[pqz.i];
-  if (presMatch(guess, p)) {
+
+  if (cfg.ordered) {
+    const r = listMatchOrdered(cfg, guess, qz.i);
+    if (r.idx !== undefined) {
+      const item = cfg.items[r.idx];
+      inp.value = '';
+      qz.i++;
+      listFb(`✓ ${esc(item.name)}`, 'good');
+      if (qz.i >= cfg.items.length) return finishList(cfg);
+      updateListUI(cfg);
+      inp.focus();
+    } else {
+      qz.wrong++;
+      shakeEl(inp);
+      inp.select();
+      listFb(qz.wrong > 1 ? `✗ Still not #${cfg.items[qz.i].n}` : `✗ Not #${cfg.items[qz.i].n} — try again`, 'bad');
+      updateListUI(cfg);
+    }
+    return;
+  }
+
+  const r = listMatchUnordered(cfg, guess, qz.found);
+  if (r.idx !== undefined) {
+    qz.found.add(r.idx);
     inp.value = '';
-    pqz.i++;
-    presFb(`✓ ${esc(p.name)}`, 'good');
-    if (pqz.i >= PRES.length) return finishPres();
-    updatePresUI();
+    listFb(`✓ ${esc(cfg.items[r.idx].name)}`, 'good');
+    if (qz.found.size >= cfg.items.length) return finishList(cfg);
+    updateListUI(cfg);
     inp.focus();
-  } else {
-    pqz.wrong++;
-    inp.classList.remove('shake'); void inp.offsetWidth; inp.classList.add('shake');
+  } else if (r.already !== undefined) {
+    listFb(`Already got <b>${esc(cfg.items[r.already].name)}</b>`, 'info');
     inp.select();
-    presFb(pqz.wrong > 1 ? `✗ Still not #${p.n}` : `✗ Not #${p.n} — try again`, 'bad');
-    updatePresUI();
+  } else if (r.ambiguous) {
+    listFb('More than one play fits — be more specific.', 'info');
+    inp.select();
+  } else {
+    qz.wrong++;
+    shakeEl(inp);
+    inp.select();
+    listFb(qz.wrong > 1 ? '✗ Still not one of them' : '✗ Not one of them — try again', 'bad');
+    updateListUI(cfg);
   }
 }
 
-function revealPres() {
-  if (!pqz || pqz.done) return;
-  const p = PRES[pqz.i];
-  pqz.revealed.add(pqz.i);
-  pqz.i++;
-  presFb(`#${p.n} was <b>${esc(p.name)}</b>`, 'bad');
-  if (pqz.i >= PRES.length) return finishPres();
-  updatePresUI();
-  $('#pin')?.focus();
+function revealList(cfg) {
+  const st = listSt(cfg), qz = st.qz;
+  if (!qz || qz.done) return;
+  let idx;
+  if (cfg.ordered) idx = qz.i;
+  else {
+    const left = cfg.items.map((_, i) => i).filter(i => !qz.found.has(i));
+    if (!left.length) return finishList(cfg);
+    idx = left[Math.floor(Math.random() * left.length)];
+  }
+  const item = cfg.items[idx];
+  qz.revealed.add(idx);
+  if (cfg.ordered) qz.i++;
+  else qz.found.add(idx);
+  listFb(cfg.ordered ? `#${item.n} was <b>${esc(item.name)}</b>` : `<b>${esc(item.name)}</b>`, 'bad');
+  if ((cfg.ordered ? qz.i : qz.found.size) >= cfg.items.length) return finishList(cfg);
+  updateListUI(cfg);
+  $('#lin')?.focus();
 }
 
-function finishPres() {
-  clearInterval(ptimer);
-  pqz.elapsed = Date.now() - pqz.t0;
-  pqz.done = true;
-  const prev = store.presBest;
-  const better = !prev || pqz.revealed.size < prev.miss ||
-    (pqz.revealed.size === prev.miss && pqz.elapsed < prev.ms);
-  if (better) { store.presBest = { miss: pqz.revealed.size, ms: pqz.elapsed }; pqz.newBest = !!prev; save(); }
-  pv = 'results';
-  renderPres();
+function finishList(cfg) {
+  const st = listSt(cfg), qz = st.qz;
+  clearInterval(st.timer);
+  qz.elapsed = Date.now() - qz.t0;
+  qz.done = true;
+  const prev = store[cfg.bestKey];
+  const better = !prev || qz.revealed.size < prev.miss ||
+    (qz.revealed.size === prev.miss && qz.elapsed < prev.ms);
+  if (better) { store[cfg.bestKey] = { miss: qz.revealed.size, ms: qz.elapsed }; qz.newBest = !!prev; save(); }
+  st.view = 'results';
+  renderList(cfg);
 }
 
-function quitPres() { clearInterval(ptimer); pqz = null; pv = 'home'; renderPres(); }
+function quitList(cfg) {
+  const st = listSt(cfg);
+  clearInterval(st.timer);
+  st.qz = null;
+  st.view = 'home';
+  renderList(cfg);
+}
 
 const PACTIONS = {
-  start: startPres,
-  reveal: revealPres,
-  quit: quitPres,
-  list: () => { pqz = null; pv = 'home'; renderPres(); },
+  start: () => startList(LIST_MODULES[activeList]),
+  reveal: () => revealList(LIST_MODULES[activeList]),
+  quit: () => quitList(LIST_MODULES[activeList]),
+  list: () => { const cfg = LIST_MODULES[activeList], st = listSt(cfg); st.qz = null; st.view = 'home'; renderList(cfg); },
 };
 panel.addEventListener('click', e => {
   const b = e.target.closest('[data-pact]');
@@ -1468,7 +1642,7 @@ document.addEventListener('keydown', e => {
 // and leaves the list as the only thing that scrolls.
 const keepQuizAnchored = () => {
   const d = document.body.dataset;
-  const quizzing = (d.app === 'presidents' && d.pview === 'quiz') ||
+  const quizzing = (d.module === 'list' && d.lview === 'quiz') ||
     (d.app === 'countries' && d.view === 'quiz');
   if (quizzing && window.scrollY) window.scrollTo(0, 0);
 };
