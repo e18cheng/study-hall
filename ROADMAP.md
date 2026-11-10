@@ -23,6 +23,7 @@
 ### 5. Shakespeare and Literature
 - Play to character, author to work, work to author
 - Extensions: famous opening lines (paraphrased), literary prizes, poets
+- Live now: play ↔ character and synopsis → play flashcards, plus the full plays guide and list drill.
 
 ### 6. Science
 - Periodic table: symbol to element, element to number

@@ -221,6 +221,47 @@ body[data-module="list"] #listmain { display: block; }
 .cat-comedy { --pc: #2f9e8f; } .cat-history { --pc: #d8a13a; }
 .cat-tragedy { --pc: #d64242; } .cat-romance { --pc: #9b6bd6; }
 
+/* Shakespeare: study guide */
+.guide { max-width: 860px; }
+.guidebar { position: sticky; top: 0; z-index: 2; display: grid; gap: 8px; padding: 0 0 10px;
+  background: linear-gradient(var(--bg) 82%, transparent); }
+.guidebar input { width: 100%; padding: 9px 11px; border: 1px solid var(--border); border-radius: 8px; background: var(--panel); outline: none; }
+.guidebar input:focus { border-color: var(--accent); }
+.jump { display: flex; flex-wrap: wrap; gap: 6px; }
+.jump .chip:hover { border-color: var(--accent); color: var(--accent); }
+.gtype[hidden], .play[hidden] { display: none; }
+.gtype { scroll-margin-top: 84px; }
+.gtype > h2 { margin: 22px 0 2px; font-size: 15px; }
+.play { padding: 12px 0 13px; border-top: 1px solid var(--border); }
+.play h3 { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 6px; margin: 0 0 5px;
+  font-size: 15px; font-weight: 700; letter-spacing: 0; text-transform: none; color: var(--text); }
+.play .date { font-size: 12px; font-weight: 500; color: var(--muted); font-variant-numeric: tabular-nums; }
+.play .chars { margin: 0 0 7px; font-size: 12.5px; color: var(--muted); }
+.play .chars span { margin-right: 4px; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.play .syn { margin: 0; font-size: 14px; line-height: 1.55; }
+
+/* Shakespeare: flashcards */
+.cards { display: flex; flex-direction: column; min-height: 100%; }
+.cards > .fcard { margin: auto 0; }
+.fcard { padding: 30px; border: 1px solid var(--border); border-radius: 16px; background: var(--panel);
+  box-shadow: 0 8px 30px rgba(0,0,0,.06); }
+.fcard .kicker { margin-bottom: 10px; font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.fcard .ctext { font-size: 30px; font-weight: 700; line-height: 1.25; letter-spacing: -.01em; }
+.fcard .ctext.syn { font-size: 19px; font-weight: 500; line-height: 1.55; letter-spacing: 0; }
+
+.modes { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px; }
+.mode { padding: 9px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--panel);
+  font-size: 12.5px; font-weight: 600; text-align: left; }
+.mode:hover { border-color: var(--accent); }
+.mode.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent); }
+
+.missed { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.missed li { padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--panel); }
+.missed .kicker { margin-bottom: 4px; font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.missed .mprompt { margin-bottom: 4px; font-weight: 600; }
+.missed .manswer { color: var(--good); font-weight: 600; }
+.empty { padding: 40px 0; color: var(--muted); text-align: center; }
+
 @media (max-width: 760px) {
   body { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); }
   .phead { padding: 4px 12px 4px 9px; }
@@ -249,6 +290,11 @@ body[data-module="list"] #listmain { display: block; }
      sidebar controls and the action buttons stay pinned at the bottom. */
   body[data-module="list"]:not(.quizzing) #listmain { order: 3; overflow: visible; }
   body[data-module="list"]:not(.quizzing) #listmain .lmain { padding: 0 16px 16px; }
+  /* Shakespeare home: the mode picker and start buttons come first, then the long
+     guide, so the round can be started without scrolling past 39 plays. */
+  body[data-app="shakespeare"][data-module="list"][data-lview="home"] .pbody { order: 3; }
+  body[data-app="shakespeare"][data-module="list"][data-lview="home"] #listmain { order: 6; }
+  body[data-app="shakespeare"][data-module="list"][data-lview="home"] #listmain .guide { padding-top: 14px; border-top: 1px solid var(--border); }
   /* Presidents quiz: a fixed shell. The header and the input stay put and the list scrolls
      between them, instead of the whole page scrolling under a floating input. */
   /* --app-vh is kept in sync with the visual viewport: Safari shrinks that for the keyboard
@@ -276,6 +322,12 @@ body[data-module="list"] #listmain { display: block; }
   .cont-h { padding: 8px 0 6px; }
   .clist button { padding: 7px 4px; }
   .qform input { font-size: 16px; } /* below 16px iOS Safari zooms the page on focus */
+  .guidebar { position: static; background: none; }
+  .guidebar input { font-size: 16px; }
+  .fcard { padding: 22px; border-radius: 12px; }
+  .fcard .ctext { font-size: 24px; }
+  .fcard .ctext.syn { font-size: 17px; }
+  .cards { padding-top: 18px; padding-bottom: 18px; }
   .zoomctl { right: 8px; bottom: 8px; flex-direction: row; }
   .zoomctl button { width: 30px; height: 30px; font-size: 15px; }
 }
@@ -796,6 +848,7 @@ function setView(v) {
 }
 
 function render() {
+  if (app === 'shakespeare') { activeList = null; return renderShakes(); }
   if (LIST_MODULES[app]) { activeList = app; return renderList(LIST_MODULES[app]); }
   const scroll = $('.pscroll', panel)?.scrollTop || 0;
   panel.innerHTML = navHeadHtml() + (view === 'home' ? homeHtml() : view === 'study' ? studyHtml() : view === 'quiz' ? quizHtml() : resultsHtml());
@@ -1007,7 +1060,16 @@ panel.addEventListener('change', e => {
   } else if ('labels' in t.dataset) { store.labels = t.checked; save(); rescale(); }
   else if ('hard' in t.dataset) { store.hard = t.checked; save(); }
 });
-panel.addEventListener('submit', e => { e.preventDefault(); if (LIST_MODULES[app]) submitList(LIST_MODULES[app]); else submitGuess(); });
+panel.addEventListener('submit', e => {
+  e.preventDefault();
+  if (app === 'shakespeare') {
+    if (listDrill) submitList(LIST_MODULES.shakespeare);
+    else if (shakes.view === 'cards') submitCard();
+    return;
+  }
+  if (LIST_MODULES[app]) submitList(LIST_MODULES[app]);
+  else submitGuess();
+});
 panel.addEventListener('pointerover', e => {
   const b = e.target.closest('[data-act=locate]');
   if (hovCode) setHover(hovCode, false);
@@ -1180,7 +1242,15 @@ function setApp(a) {
   document.body.classList.toggle('quizzing', a === 'countries' && view === 'quiz');
   for (const b of document.querySelectorAll('#nav [data-app]')) b.classList.toggle('on', b.dataset.app === a);
   hideTip();
-  if (LIST_MODULES[a]) {
+  if (a === 'shakespeare') {
+    const st = listState.shakespeare;
+    clearInterval(st.timer);
+    st.qz = null;
+    st.view = 'home';
+    activeList = null;
+    listDrill = false;
+    renderShakes();
+  } else if (LIST_MODULES[a]) {
     activeList = a;
     renderList(LIST_MODULES[a]);
   } else {
@@ -1321,11 +1391,217 @@ const PLAY_DEFS = [
   ['The Two Noble Kinsmen', '1613–14', 'Romance', 'two noble kinsmen'],
 ];
 
-const PLAYS = PLAY_DEFS.map(([name, years, type, aliases], i) => ({
-  n: i + 1, name, meta: years, tip: type,
-  cls: 'cat-' + type.toLowerCase().replace(/[^a-z]+/g, '-'),
-  forms: [name, ...aliases.split('|')].filter(Boolean).map(norm),
-}));
+// Study guide content: 4-6 sentence plot summaries for the guide, plus a one-line
+// teaser for the synopsis flashcards. `chars` lists the important characters shown in
+// the guide; names shared across plays are still shown here but are skipped when
+// building character -> play cards, so the card answer stays unambiguous.
+const PLAY_GUIDE = {
+  "The Two Gentlemen of Verona": {
+    chars: ["Valentine", "Proteus", "Julia", "Silvia", "Launce", "Speed"],
+    teaser: "Two best friends from Verona both fall for the Duke of Milan's daughter, and one betrays the other.",
+    summary: "Valentine and Proteus are inseparable friends in Verona. Valentine leaves for Milan and falls for Silvia, the Duke's daughter, while Proteus stays behind with Julia. When Proteus visits Milan he instantly falls for Silvia too and betrays Valentine, getting him banished. Julia travels disguised as a boy and witnesses Proteus's treachery; in the forest, Valentine rescues Silvia from Proteus, and Proteus repents. The couples are reconciled, and the Duke pardons the outlaws.",
+  },
+  "The Taming of the Shrew": {
+    chars: ["Petruchio", "Katherine", "Baptista", "Lucentio", "Grumio", "Tranio"],
+    teaser: "A gentleman 'tames' a sharp-tongued heiress so that her younger sister can marry.",
+    summary: "Baptista of Padua will not let his younger daughter Bianca marry until her sharp-tongued elder sister Katherine does. Petruchio arrives and agrees to marry Katherine for her dowry, then sets about 'taming' her with deprivation, contradiction, and theatrical behavior. Meanwhile Bianca's suitors compete in disguise, and Lucentio wins her by swapping identities with his servant Tranio. Katherine eventually submits to Petruchio's authority, and the play ends with a wager over which wife is most obedient.",
+  },
+  "The Comedy of Errors": {
+    chars: ["Antipholus of Ephesus", "Antipholus of Syracuse", "Dromio of Ephesus", "Dromio of Syracuse", "Adriana", "Luciana"],
+    teaser: "Two sets of identical twins, separated at birth, arrive in the same city and are mistaken for each other.",
+    summary: "Two sets of identical twins — the Antipholus brothers and their servants, the Dromios — were separated in a shipwreck. Antipholus of Syracuse and his Dromio arrive in Ephesus, where Antipholus of Ephesus and his Dromio already live. A chain of mistaken identities follows: wives, merchants, and officers confuse the pairs, and one Antipholus is arrested while the other dines with his wife. The confusion ends when the twins meet, the abbess reveals herself as their mother, and the family is reunited.",
+  },
+  "Love's Labour's Lost": {
+    chars: ["King Ferdinand", "Berowne", "Longaville", "Dumaine", "Rosaline", "Princess of France"],
+    teaser: "Four noblemen swear off women to study, then immediately fall for a visiting princess and her ladies.",
+    summary: "The King of Navarre and three lords swear to study for three years, fasting and avoiding women. Their oath collapses at once when the Princess of France arrives with her ladies, and each man secretly falls in love. A comic Spaniard, a pedant, a curate, and a page add to the confusion as love letters and disguises go astray. The men stage a masque of Russians to woo the ladies, who see through it. News of the French king's death ends the revels, and the women impose a year of penance before any marriages can take place.",
+  },
+  "A Midsummer Night's Dream": {
+    chars: ["Puck", "Oberon", "Titania", "Bottom", "Hermia", "Lysander"],
+    teaser: "Four young lovers and a troupe of actors wander into a fairy-haunted wood on midsummer night.",
+    summary: "Theseus, Duke of Athens, is about to marry Hippolyta. Hermia loves Lysander, but her father wants her to marry Demetrius, so the lovers flee into the woods; Helena, who loves Demetrius, follows. In the same woods Oberon and Titania, king and queen of the fairies, are quarreling, and Oberon sends Puck to fetch a love potion. Puck's mistakes make both men love Helena, while Titania falls for Bottom, an actor whose head has been turned into an ass's. The potion is corrected, the lovers are paired properly, and the play ends with the wedding and Bottom's troupe performing a hilariously bad play.",
+  },
+  "The Merchant of Venice": {
+    chars: ["Shylock", "Portia", "Antonio", "Bassanio", "Jessica", "Nerissa"],
+    teaser: "A merchant pledges a pound of flesh to a moneylender, and a disguised heiress saves him in court.",
+    summary: "Bassanio needs money to court Portia, so he borrows from Antonio, a merchant whose ships are at sea. Shylock, the Jewish moneylender, demands a pound of Antonio's flesh if the loan is not repaid. Portia, bound by her father's will to marry the man who chooses the right casket, marries Bassanio, and her maid Nerissa marries Gratiano. When Antonio's ships are reported lost, Shylock demands his bond in court. Portia arrives disguised as a lawyer, argues that Shylock may take flesh but not blood, and turns the law against him; the couples are reunited, and Shylock is forced to convert.",
+  },
+  "The Merry Wives of Windsor": {
+    chars: ["Falstaff", "Mistress Ford", "Mistress Page", "Anne Page", "Fenton", "Doctor Caius"],
+    teaser: "A fat knight tries to seduce two Windsor wives for their money and is pranked mercilessly.",
+    summary: "Sir John Falstaff, short of money, decides to seduce two wealthy wives of Windsor, Mistress Ford and Mistress Page, sending them identical love letters. The wives compare notes and plot his humiliation. They arrange assignations and then hide him in a laundry basket, dump him in the river, and finally lure him to a midnight masquerade in the park. Falstaff is pinched and mocked by the disguised townsfolk, including the wives' husbands and a jealous Ford. The play ends with Falstaff admitted to the company and the young lovers Fenton and Anne Page allowed to marry.",
+  },
+  "Much Ado About Nothing": {
+    chars: ["Beatrice", "Benedick", "Hero", "Claudio", "Don Pedro", "Don John"],
+    teaser: "Two witty nobles deny their love while a young couple's wedding is wrecked by a villain's lie.",
+    summary: "Don Pedro and his soldiers return to Messina, where Claudio falls for Hero and Benedick resumes his witty war with Beatrice. Don Pedro helps Claudio woo Hero, and the wedding is set; meanwhile the others trick Benedick and Beatrice into admitting their love for each other. Don John, the villainous brother, stages a scene that makes Claudio believe Hero has been unfaithful, and Claudio denounces her at the altar. Hero faints and is reported dead, while the bumbling constable Dogberry uncovers the plot. Claudio agrees to marry Hero's 'cousin' as penance, discovers it is Hero herself, and the two couples are married.",
+  },
+  "As You Like It": {
+    chars: ["Rosalind", "Orlando", "Celia", "Touchstone", "Jaques", "Duke Frederick"],
+    teaser: "A duke's daughter flees into the Forest of Arden disguised as a boy and tests the man who loves her.",
+    summary: "Orlando, the youngest son of Sir Rowland de Boys, is persecuted by his brother Oliver and flees to the Forest of Arden. Rosalind, the Duke's daughter, is banished by her uncle and travels disguised as the boy Ganymede, accompanied by her cousin Celia and the clown Touchstone. In the forest Orlando hangs love poems for Rosalind, and Rosalind, still disguised, tests his love by pretending to cure him of it. The melancholy Jaques comments on the world, and the exiled Duke lives contentedly with his followers. Oliver repents, falls for Celia, and the play ends with four marriages and the restoration of the dukedom.",
+  },
+  "Twelfth Night": {
+    chars: ["Viola", "Olivia", "Orsino", "Malvolio", "Feste", "Sir Toby Belch"],
+    teaser: "A shipwrecked noblewoman disguises herself as a boy and serves the duke she loves.",
+    summary: "Viola is shipwrecked on the coast of Illyria and believes her twin brother Sebastian is dead. She disguises herself as a boy, Cesario, and enters the service of Duke Orsino, who is wooing the Countess Olivia. Olivia falls for Cesario instead, while Viola secretly loves Orsino. Olivia's steward Malvolio is tricked into believing Olivia loves him, and his absurd yellow stockings and cross-gartering make him a laughingstock. Sebastian arrives, is mistaken for Cesario, and marries Olivia. Viola reveals herself, Orsino proposes to her, and Malvolio stalks off vowing revenge.",
+  },
+  "All's Well That Ends Well": {
+    chars: ["Helena", "Bertram", "Countess of Rousillon", "King of France", "Parolles", "Lafeu"],
+    teaser: "A physician's daughter cures a king, marries a reluctant count, and completes impossible tasks to win him back.",
+    summary: "Helena, the orphaned daughter of a physician, loves Bertram, a young count who considers her beneath him. She cures the King of France of a fistula and is allowed to choose a husband; she chooses Bertram, who reluctantly marries her and then flees to the wars in Italy. Bertram vows he will never be her husband until she can get his ring from his finger and a child from his body. Helena follows him to Florence, disguises herself as a pilgrim, and arranges a bed-trick in which she takes the place of a woman Bertram is courting. She obtains the ring and becomes pregnant; Bertram returns home, is exposed, and finally accepts her.",
+  },
+  "Measure for Measure": {
+    chars: ["Duke Vincentio", "Isabella", "Angelo", "Claudio", "Lucio", "Mariana"],
+    teaser: "A puritanical deputy condemns a young man to death, and his sister is offered a corrupt bargain.",
+    summary: "The Duke of Vienna, disturbed by the city's lax morals, leaves his puritanical deputy Angelo in charge and pretends to travel abroad. Angelo immediately condemns Claudio to death for impregnating his fiancée Juliet before marriage. Claudio's sister Isabella, about to become a nun, pleads for his life, and Angelo offers to spare Claudio if she sleeps with him. The Duke, disguised as a friar, arranges a bed-trick in which Mariana, Angelo's abandoned fiancée, takes Isabella's place. Angelo breaks his promise anyway, but the Duke returns, exposes him, and forces him to marry Mariana; Claudio is saved, and the Duke proposes to Isabella.",
+  },
+  "Troilus and Cressida": {
+    chars: ["Troilus", "Cressida", "Pandarus", "Hector", "Achilles", "Ulysses"],
+    teaser: "A Trojan prince and Cressida fall in love during the Trojan War, but she is exchanged to the Greek camp.",
+    summary: "The Trojan War drags on with neither side able to win. Troilus, a Trojan prince, loves Cressida, and her uncle Pandarus arranges their meeting. Cressida's father has defected to the Greeks, and when she is exchanged for a Trojan prisoner she is taken to the Greek camp. There she yields to the Greek general Diomedes, and Troilus, watching in disguise, sees her betrayal. The Greek and Trojan heroes spend their time in bitter debate and single combat, with Achilles sulking in his tent until Patroclus's death draws him out. The play ends without resolution, with Troy still under siege and the lovers parted.",
+  },
+  "Henry VI, Part 1": {
+    chars: ["Henry VI", "Joan of Arc", "Talbot", "Charles the Dauphin", "York", "Margaret"],
+    teaser: "England's young king loses France to Joan of Arc and sees his nobles turn on one another.",
+    summary: "Henry V has died, and his infant son Henry VI inherits a kingdom at war in France. The English nobles quarrel among themselves while the French, inspired by Joan of Arc, win several victories. Talbot, the English champion, is surrounded and killed in battle after the nobles fail to reinforce him. Joan is captured and burned, and the English position in France collapses. In England the rivalry between the houses of York and Lancaster begins to take shape, and Henry is pressured into marrying Margaret of Anjou, setting the stage for civil war.",
+  },
+  "Henry VI, Part 2": {
+    chars: ["Henry VI", "Margaret", "Gloucester", "York", "Jack Cade", "Eleanor Cobham"],
+    teaser: "A weak king's court is split by feuding nobles while a Kentish rebellion storms London.",
+    summary: "Henry VI's weak rule allows the nobles to fight for power. The Duke of Gloucester, the king's honest uncle, is undermined by his enemies and murdered, while Cardinal Beaufort and the Duke of Suffolk dominate the court. Queen Margaret and Suffolk openly flaunt their affair, and the commons grow restless. Jack Cade leads a Kentish rebellion that storms London, and the rebels are only dispersed after Cade is killed. The Duke of York returns from Ireland, raises an army, and claims the crown, beginning the Wars of the Roses.",
+  },
+  "Henry VI, Part 3": {
+    chars: ["Henry VI", "Margaret", "York", "Edward IV", "Warwick", "Lady Grey"],
+    teaser: "York and Lancaster tear England apart in the Wars of the Roses.",
+    summary: "The Wars of the Roses dominate the play as York and Lancaster fight for the throne. York captures Henry VI and is named heir, but Queen Margaret raises an army, kills York, and puts his head on the gates of York. York's sons — Edward, George, and Richard — continue the fight, and Edward is crowned Edward IV. Warwick switches sides, Henry is briefly restored, and Edward wins again at Barnet and Tewkesbury, where Henry's son is killed and Henry himself is murdered in the Tower. Richard, Duke of Gloucester, begins to emerge as the most ruthless of the victors.",
+  },
+  "Richard III": {
+    chars: ["Richard III", "Lady Anne", "Clarence", "Buckingham", "Richmond", "Stanley"],
+    teaser: "A scheming duke murders his way to the throne and falls at Bosworth.",
+    summary: "Richard, Duke of Gloucester, is determined to become king. He has his brother Clarence murdered, woos Lady Anne over her husband's coffin, and helps remove the young princes who stand between him and the throne. After Edward IV's death, Richard has the princes imprisoned in the Tower and then killed, and he takes the crown. His reign is short and unstable; Buckingham rebels, and the Earl of Richmond invades from France. On the night before Bosworth Richard is haunted by the ghosts of his victims, and he is killed in battle; Richmond becomes Henry VII and marries Elizabeth of York to unite the houses.",
+  },
+  "King John": {
+    chars: ["King John", "Faulconbridge", "Arthur", "Constance", "Eleanor of Aquitaine", "Cardinal Pandulph"],
+    teaser: "An unpopular king fights France and the Church over his nephew's claim to the throne.",
+    summary: "King John of England faces a rival claim from his nephew Arthur, backed by the King of France. War follows, and John's forces capture Arthur, who dies in suspicious circumstances. John is excommunicated by the Pope and forced to submit, while his nobles grow alienated. The Bastard, John's loyal and sardonic nephew, becomes the play's commentator on politics and national identity. John is poisoned by a monk, and his son Henry becomes king as the barons return to their allegiance; the play ends with the Bastard's patriotic speech about England.",
+  },
+  "Richard II": {
+    chars: ["Richard II", "Bolingbroke", "John of Gaunt", "Mowbray", "Aumerle", "Queen Isabel"],
+    teaser: "A vain king seizes his cousin's inheritance, and the cousin returns to take the crown.",
+    summary: "Richard II is a vain and extravagant king who banishes his cousin Henry Bolingbroke and seizes the estates of Bolingbroke's father, John of Gaunt. Bolingbroke returns from exile to claim his inheritance, and the nobles flock to him. Richard's support collapses, and he is forced to give up the crown. Bolingbroke becomes Henry IV, and Richard is imprisoned in Pomfret Castle, where he is murdered by Sir Exton. The play ends with Henry IV vowing to go on crusade to atone for Richard's death.",
+  },
+  "Henry IV, Part 1": {
+    chars: ["Henry IV", "Prince Hal", "Falstaff", "Hotspur", "Worcester", "Glendower"],
+    teaser: "A king beset by rebels worries about his wayward son, who carouses with Falstaff.",
+    summary: "Henry IV is troubled by rebellion and by his son Hal, the Prince of Wales, who spends his time drinking and carousing in Eastcheap with Sir John Falstaff. The Percy family, led by Hotspur, joins forces with the Welsh leader Glendower and the Scots Earl of Douglas to challenge the king. Hal promises to redeem himself, and at the Battle of Shrewsbury he saves his father and kills Hotspur in single combat. Falstaff survives by playing dead, and the rebellion is crushed, though the king still worries about his son's wild ways.",
+  },
+  "Henry IV, Part 2": {
+    chars: ["Henry IV", "Prince Hal", "Falstaff", "Prince John", "Doll Tearsheet", "Justice Shallow"],
+    teaser: "The king's health fails as rebellion sputters on, and the prince must reject his old companion.",
+    summary: "The rebellion continues, but the king's health is failing. Falstaff travels through the countryside recruiting soldiers, taking bribes and collecting a ragtag army. Prince Hal keeps company with Falstaff and his cronies, but he is increasingly drawn toward his royal duties. The rebels are defeated by Prince John, and Henry IV dies, leaving Hal the crown. When Falstaff greets the new king with his usual familiarity, Hal rejects him publicly, and Falstaff is left to face the consequences of his old life.",
+  },
+  "Henry V": {
+    chars: ["Henry V", "Fluellen", "Canterbury", "Katherine", "Pistol", "Montjoy"],
+    teaser: "A young king invades France and wins a miraculous victory at Agincourt.",
+    summary: "Henry V, now king, decides to press his claim to the French throne and invades France. His army is outnumbered and exhausted, but on St Crispin's Day at Agincourt he wins a stunning victory against the French. The play moves between the battlefield and the comic world of Pistol, Bardolph, and the Welsh captain Fluellen. After the victory Henry woos Princess Katherine of France and secures a peace treaty. The chorus reminds the audience that Henry's son will lose what his father won, but the play ends with the marriage and the hope of lasting peace.",
+  },
+  "Henry VIII": {
+    chars: ["Wolsey", "Cromwell", "Anne Boleyn", "Catherine of Aragon", "Cranmer", "Gardiner"],
+    teaser: "A king's divorce and remarriage set off a struggle between Cardinal Wolsey and the rising Cromwell.",
+    summary: "Henry VIII's court is dominated by Cardinal Wolsey, who uses his power to advance himself. Henry falls for Anne Boleyn, and Wolsey's failure to secure the king's divorce from Catherine of Aragon brings about his downfall. The king breaks with Rome and appoints Thomas Cranmer as Archbishop of Canterbury. Catherine is divorced, Anne is crowned, and the play ends with the birth of Elizabeth and Cranmer's prophecy of England's future greatness. The tone is pageant-like, with falls from power and the triumph of the Tudor dynasty.",
+  },
+  "Edward III": {
+    chars: ["Edward III", "Black Prince", "Countess of Salisbury", "King John of France", "David of Scotland", "Sir Walter Manny"],
+    teaser: "An English king presses his claim to France and his son wins glory at Crécy.",
+    summary: "Edward III of England presses his claim to the French crown and goes to war. The play follows his campaign in France, including a naval victory and the siege of Calais, and his son the Black Prince's triumph at Crécy. A subplot involves the Countess of Salisbury, whose virtue Edward tests and then respects. The French king John is captured, and the English celebrate their victories. The play ends with Edward's return to England and the birth of the Order of the Garter, though the historical chronicle leaves the war unresolved.",
+  },
+  "Titus Andronicus": {
+    chars: ["Titus", "Tamora", "Aaron", "Lavinia", "Saturninus", "Lucius"],
+    teaser: "A Roman general's ritual sacrifice triggers a cycle of rape, mutilation, and revenge.",
+    summary: "Titus Andronicus, a Roman general, returns from war with the captive Queen Tamora and her sons. He sacrifices one of her sons in revenge for his own dead sons, and Tamora vows vengeance. With her lover Aaron she arranges the rape and mutilation of Titus's daughter Lavinia and the murder of two of his sons, framing them for the crime. Titus feigns madness, kills Tamora's sons, and serves them to her in a pie; he then kills Lavinia and Tamora, and is killed by Saturninus. Lucius, Titus's surviving son, becomes emperor and restores order.",
+  },
+  "Romeo and Juliet": {
+    chars: ["Romeo", "Juliet", "Mercutio", "Tybalt", "Friar Laurence", "Capulet"],
+    teaser: "Two young lovers from feuding families marry in secret, with fatal consequences.",
+    summary: "Romeo and Juliet, the children of feuding families in Verona, meet at a party and fall in love. They marry in secret with Friar Laurence's help, but Romeo is banished after killing Tybalt in a street fight. Juliet's parents arrange her marriage to Paris, and the Friar gives her a potion that makes her appear dead. Romeo, not receiving the message, believes she is truly dead and kills himself in the tomb. Juliet wakes, finds him dead, and kills herself; the families' grief ends their feud.",
+  },
+  "Julius Caesar": {
+    chars: ["Julius Caesar", "Brutus", "Cassius", "Mark Antony", "Calpurnia", "Casca"],
+    teaser: "Roman senators assassinate a popular general, and civil war destroys the conspirators.",
+    summary: "Julius Caesar returns to Rome in triumph, and his growing power alarms the senators. Cassius persuades Brutus that Caesar intends to become king, and the conspirators assassinate him on the Ides of March. Brutus allows Mark Antony to speak at the funeral, and Antony's speech turns the crowd against the conspirators. Civil war follows; Brutus and Cassius are defeated at Philippi, and both take their own lives. Antony and Octavius emerge as the rulers of Rome.",
+  },
+  "Hamlet": {
+    chars: ["Hamlet", "Claudius", "Gertrude", "Ophelia", "Polonius", "Laertes"],
+    teaser: "A Danish prince learns his uncle murdered his father and feigns madness while seeking revenge.",
+    summary: "Hamlet, prince of Denmark, returns from university to find his father dead and his mother Gertrude married to his uncle Claudius, who has taken the throne. The ghost of Hamlet's father tells him that Claudius murdered him and demands revenge. Hamlet feigns madness, stages a play to test Claudius's guilt, and accidentally kills Polonius behind a curtain. Ophelia, Polonius's daughter, goes mad and drowns, and Laertes, her brother, returns to avenge her and his father. Claudius arranges a fencing match with a poisoned blade; Gertrude drinks poisoned wine, Laertes and Hamlet are both wounded, and Hamlet kills Claudius before dying himself. Fortinbras of Norway arrives to take the throne.",
+  },
+  "Othello": {
+    chars: ["Othello", "Iago", "Desdemona", "Cassio", "Emilia", "Roderigo"],
+    teaser: "A Moorish general is undone by his ensign's lies about his wife's fidelity.",
+    summary: "Othello, a Moorish general in Venetian service, secretly marries Desdemona, the daughter of a senator. Iago, Othello's ensign, is passed over for promotion and plots revenge. He convinces Othello that Desdemona is having an affair with Cassio, using a handkerchief and a series of insinuations. Othello's jealousy grows until he smothers Desdemona in their bedchamber. Emilia, Iago's wife, reveals the truth, and Iago kills her; Othello, realizing his mistake, kills himself. Cassio is left to govern Cyprus, and Iago is taken away to be tortured.",
+  },
+  "King Lear": {
+    chars: ["Lear", "Cordelia", "Goneril", "Regan", "Gloucester", "Edgar"],
+    teaser: "An aging king divides his kingdom among his daughters and is cast out into a storm.",
+    summary: "King Lear decides to divide his kingdom among his three daughters according to how much they love him. Goneril and Regan flatter him, but Cordelia refuses to exaggerate and is banished. Lear soon discovers that his elder daughters intend to strip him of his remaining power, and he is cast out into a storm. Meanwhile the Earl of Gloucester is betrayed by his illegitimate son Edmund and blinded by Regan and Cornwall. Edgar, Gloucester's legitimate son, disguises himself as a mad beggar and guides his father. Cordelia returns with a French army, but she and Lear are captured; she is hanged, and Lear dies of grief. Albany and Edgar restore order.",
+  },
+  "Macbeth": {
+    chars: ["Macbeth", "Lady Macbeth", "Banquo", "Duncan", "Macduff", "Malcolm"],
+    teaser: "A Scottish nobleman, urged on by his wife and a prophecy, murders his king and seizes the throne.",
+    summary: "Macbeth, a Scottish nobleman, meets three witches who prophesy that he will become king. Encouraged by his wife, he murders King Duncan and takes the throne. He then kills Banquo, his friend, and the family of Macduff, a nobleman who has fled to England. Lady Macbeth descends into madness and dies, and Macbeth becomes a tyrant. Macduff and Malcolm raise an army, and Macbeth is killed in battle; Malcolm becomes king of Scotland.",
+  },
+  "Antony and Cleopatra": {
+    chars: ["Mark Antony", "Cleopatra", "Enobarbus", "Octavius Caesar", "Charmian", "Octavia"],
+    teaser: "A Roman general neglects his duties for the Queen of Egypt, and their world collapses at Actium.",
+    summary: "Mark Antony, one of the triumvirs of Rome, neglects his duties for Cleopatra, queen of Egypt. His rival Octavius Caesar prepares for war, and Antony's forces are defeated at Actium when Cleopatra's fleet flees. Antony believes Cleopatra has betrayed him and attempts suicide, but survives long enough to be taken to her monument. Cleopatra, rather than be paraded in Caesar's triumph, kills herself with an asp. Caesar takes control of Egypt, and the play ends with the lovers united in death.",
+  },
+  "Coriolanus": {
+    chars: ["Coriolanus", "Volumnia", "Aufidius", "Menenius", "Virgilia", "Sicinius"],
+    teaser: "A proud Roman general is banished, joins Rome's enemies, and is talked out of destroying the city.",
+    summary: "Caius Marcius, a proud Roman general, wins the name Coriolanus for his victory at Corioli. He returns to Rome and is nominated for consul, but his contempt for the common people and his refusal to show them his wounds turn them against him. He is banished and joins the Volscians, led by his old enemy Aufidius, and marches on Rome. His mother Volumnia and wife Virgilia plead with him to spare the city, and he relents. The Volscians see this as betrayal, and Aufidius has him killed.",
+  },
+  "Timon of Athens": {
+    chars: ["Timon", "Apemantus", "Alcibiades", "Flavius", "Lucullus", "Ventidius"],
+    teaser: "A generous Athenian gives away his fortune, is abandoned by his friends, and becomes a bitter hermit.",
+    summary: "Timon, a wealthy and generous Athenian nobleman, gives away his fortune to friends and entertainers. When his money runs out he asks those friends for help and is refused by all of them. Bitter and disillusioned, he leaves Athens and lives in a cave, where he finds gold and gives it away to those who will use it to destroy the city. He invites his false friends to a final banquet and serves them stones and water. He dies alone, and the play ends with his epitaph and the city's continued troubles.",
+  },
+  "Pericles": {
+    chars: ["Pericles", "Marina", "Thaisa", "Antiochus", "Helicanus", "Cerimon"],
+    teaser: "A prince loses his wife and daughter at sea and is reunited with them years later.",
+    summary: "Pericles, prince of Tyre, solves a riddle that reveals the incest of King Antiochus and flees for his life. He is shipwrecked, marries Thaisa, and loses her at sea when she appears to die in childbirth. Their daughter Marina is left with Cleon and Dionyza of Tarsus, but is kidnapped by pirates and sold to a brothel, where she preserves her virtue. Pericles, believing both wife and daughter dead, wanders in grief. He is reunited with Marina, and then with Thaisa, who has become a priestess of Diana; the family is restored.",
+  },
+  "Cymbeline": {
+    chars: ["Cymbeline", "Imogen", "Posthumus", "Iachimo", "Cloten", "Belarius"],
+    teaser: "A British king's daughter secretly marries a commoner, and a Roman scheme tests their love.",
+    summary: "Cymbeline, king of Britain, has a daughter, Imogen, who secretly marries Posthumus, a commoner. Posthumus is banished to Rome, where the scheming Iachimo bets he can seduce Imogen; he hides in her bedchamber and steals a bracelet as false proof. Posthumus orders his servant Pisanio to kill her, but Pisanio helps her escape disguised as a boy. Imogen meets her long-lost brothers, who have been raised in the Welsh mountains, and the Roman invasion brings everyone together. Iachimo confesses, Posthumus is pardoned, and Cymbeline is reunited with his family and agrees to pay tribute to Rome.",
+  },
+  "The Winter's Tale": {
+    chars: ["Leontes", "Hermione", "Perdita", "Polixenes", "Camillo", "Autolycus"],
+    teaser: "A jealous king imprisons his queen and abandons his daughter; years later a statue brings reconciliation.",
+    summary: "Leontes, king of Sicilia, becomes convinced that his pregnant queen Hermione has been unfaithful with his old friend Polixenes. He imprisons her, orders their newborn daughter abandoned, and puts Hermione on trial; she collapses when her son dies, and is reported dead. The baby is found by a shepherd and raised as Perdita. Years later Polixenes's son Florizel falls in love with Perdita, and the lovers flee to Sicilia. The truth of Perdita's birth is revealed, and a statue of Hermione comes to life, reuniting the family and ending Leontes's long penance.",
+  },
+  "The Tempest": {
+    chars: ["Prospero", "Miranda", "Ariel", "Caliban", "Alonso", "Ferdinand"],
+    teaser: "A deposed duke, now a sorcerer on an island, raises a storm to shipwreck his usurping brother.",
+    summary: "Prospero, the rightful Duke of Milan, has been living on an island with his daughter Miranda since his brother Antonio usurped him. With the help of the spirit Ariel and the earth-monster Caliban, Prospero raises a storm that shipwrecks Antonio and the King of Naples. The king's son Ferdinand falls in love with Miranda, and Prospero tests their love. Meanwhile Caliban plots with two drunken servants to kill Prospero, but the plot fails. Prospero forgives his enemies, gives up his magic, frees Ariel, and prepares to return to Milan for Miranda's wedding.",
+  },
+  "The Two Noble Kinsmen": {
+    chars: ["Palamon", "Arcite", "Emilia", "Jailer's Daughter", "Pirithous", "Artesius"],
+    teaser: "Two Theban cousins imprisoned in Athens fall for the same woman and fight for her hand.",
+    summary: "Two Theban cousins, Palamon and Arcite, are captured by Theseus of Athens and imprisoned together. Both fall in love with Emilia, Hippolyta's sister, and their friendship turns to rivalry. Arcite is released and wins favor at court, while Palamon escapes with the help of the jailer's daughter, who loves him. Theseus arranges a tournament: the winner will marry Emilia, and the loser will die. Arcite wins but is thrown from his horse and dies, leaving Palamon to marry Emilia. The jailer's daughter goes mad with unrequited love and is cared for by her father.",
+  },
+};
+
+const PLAYS = PLAY_DEFS.map(([name, years, type, aliases], i) => {
+  const g = PLAY_GUIDE[name] || { chars: [], teaser: '', summary: '' };
+  return {
+    n: i + 1, idx: i, name, meta: years, tip: type,
+    cls: 'cat-' + type.toLowerCase().replace(/[^a-z]+/g, '-'),
+    forms: [name, ...aliases.split('|')].filter(Boolean).map(norm),
+    chars: g.chars, teaser: g.teaser, summary: g.summary,
+  };
+});
 const PLAY_TYPES = [...new Set(PLAYS.map(p => p.tip))].map(name => ({
   name, cls: 'cat-' + name.toLowerCase().replace(/[^a-z]+/g, '-'),
 }));
@@ -1525,6 +1801,7 @@ function listMatchUnordered(cfg, guess, found) {
 
 function startList(cfg) {
   const st = listSt(cfg);
+  activeList = cfg.id;
   clearInterval(st.timer);
   st.qz = { i: 0, wrong: 0, revealed: new Set(), found: new Set(), t0: Date.now(), elapsed: 0, done: false, newBest: false };
   st.view = 'quiz';
@@ -1630,12 +1907,372 @@ function quitList(cfg) {
 const PACTIONS = {
   start: () => startList(LIST_MODULES[activeList]),
   reveal: () => revealList(LIST_MODULES[activeList]),
-  quit: () => quitList(LIST_MODULES[activeList]),
-  list: () => { const cfg = LIST_MODULES[activeList], st = listSt(cfg); st.qz = null; st.view = 'home'; renderList(cfg); },
+  quit: () => activeList === 'shakespeare' ? exitListDrill() : quitList(LIST_MODULES[activeList]),
+  list: () => {
+    if (activeList === 'shakespeare') return exitListDrill();
+    const cfg = LIST_MODULES[activeList], st = listSt(cfg); st.qz = null; st.view = 'home'; renderList(cfg);
+  },
 };
 panel.addEventListener('click', e => {
   const b = e.target.closest('[data-pact]');
   if (b && !b.disabled) PACTIONS[b.dataset.pact](b, e);
+});
+
+// ---------------------------------------------------------------------------
+// Shakespeare: study guide and flashcards
+// ---------------------------------------------------------------------------
+// Cards come in three kinds: a character -> play, a play -> any character, and a
+// plot teaser -> play. The study guide uses the full summary; the cards use the
+// one-line teaser so a card stays readable.
+const CARD_MODES = {
+  characters: { label: 'Characters → plays', blurb: 'A character is shown; name the play.' },
+  plays: { label: 'Plays → characters', blurb: 'A play is shown; name any character.' },
+  synopsis: { label: 'Synopses → plays', blurb: 'A short plot is shown; name the play.' },
+  mixed: { label: 'Mixed', blurb: 'A balanced mix of all three.' },
+};
+const CARD_LEN = 20;
+// Characters that are famous in more than one play, so a character card would be
+// ambiguous even though the name appears only once in this app's data.
+const CARD_SKIP = new Set([
+  'paris', 'gloucester', 'clarence', 'montague', 'shallow', 'ventidius', 'gower',
+  'ferdinand', 'lucius', 'katherine', 'helena', 'claudio', 'escalus', 'bianca',
+  'emilia', 'sebastian',
+  // Names that are famous in another play but appear in only one play's list here.
+  'kingfrance', 'kingjohnfrance', 'princessfrance', 'kingferdinand', 'pistol',
+  'warwick', 'edwardiv', 'ladygrey', 'buckingham', 'bolingbroke', 'portia',
+  'antonio', 'octaviuscaesar', 'valentine', 'flavius',
+]);
+let listDrill = false;
+
+const shakes = {
+  view: 'home',
+  mode: CARD_MODES[store.shakesMode] ? store.shakesMode : 'mixed',
+  deck: [], i: 0, correct: 0, missed: [], review: false, newBest: false,
+};
+
+// A character answer may be the full name, a significant word ("Belch", "Macduff"),
+// or the name with its title stripped ("Macbeth" for Lady Macbeth).
+function charForms(name) {
+  const STOP = new Set(['sir', 'lady', 'lord', 'king', 'queen', 'duke', 'duchess', 'earl',
+    'count', 'countess', 'mistress', 'master', 'doctor', 'friar', 'prince', 'princess',
+    'cardinal', 'archbishop', 'bishop', 'general', 'captain', 'lieutenant', 'old', 'young']);
+  const forms = new Set([norm(name)]);
+  const words = name.split(/\s+/);
+  for (const w of words) {
+    const nw = norm(w);
+    if (nw.length >= 4 && !STOP.has(nw)) forms.add(nw);
+  }
+  const stripped = words.filter(w => !STOP.has(norm(w))).join(' ');
+  if (stripped) forms.add(norm(stripped));
+  return [...forms].filter(Boolean);
+}
+
+function matchPlayCharacter(p, guess) {
+  return p.chars.some(c => charForms(c).some(f => f === guess || lev(guess, f) <= fuzzyLimit(f)));
+}
+
+function cardBest(mode) { return (store.shakesCards && store.shakesCards[mode]) || 0; }
+
+function allCardDecks() {
+  const chars = [], plays = [], syn = [];
+  const where = new Map();
+  for (const p of PLAYS) for (const c of p.chars) {
+    const k = norm(c);
+    if (!where.has(k)) where.set(k, new Set());
+    where.get(k).add(p.idx);
+  }
+  for (const p of PLAYS) {
+    for (const c of p.chars) {
+      const k = norm(c);
+      if (where.get(k).size !== 1) continue; // shared across plays
+      if (CARD_SKIP.has(k)) continue;        // ambiguous outside this deck
+      if (norm(p.name).includes(k)) continue; // name is in the play title
+      chars.push({ kind: 'character', play: p, prompt: c, answer: p.name });
+    }
+    plays.push({ kind: 'play', play: p, prompt: p.name, answer: p.chars.join(' · ') });
+    if (p.teaser) syn.push({ kind: 'synopsis', play: p, prompt: p.teaser, answer: p.name });
+  }
+  return { chars, plays, syn };
+}
+
+function drawDeck(mode) {
+  const { chars, plays, syn } = allCardDecks();
+  if (mode === 'characters') return shuffle(chars.slice()).slice(0, CARD_LEN);
+  if (mode === 'plays') return shuffle(plays.slice()).slice(0, CARD_LEN);
+  if (mode === 'synopsis') return shuffle(syn.slice()).slice(0, CARD_LEN);
+  return shuffle([
+    ...shuffle(chars.slice()).slice(0, 8),
+    ...shuffle(plays.slice()).slice(0, 6),
+    ...shuffle(syn.slice()).slice(0, 6),
+  ]);
+}
+
+function startCards(mode = shakes.mode, deck) {
+  if (!CARD_MODES[mode]) mode = 'mixed';
+  shakes.mode = mode;
+  shakes.deck = (deck && deck.length) ? deck : drawDeck(mode);
+  shakes.i = 0;
+  shakes.correct = 0;
+  shakes.missed = [];
+  shakes.review = !!(deck && deck.length);
+  shakes.newBest = false;
+  shakes.view = 'cards';
+  renderShakes();
+}
+
+function finishCards() {
+  const st = shakes;
+  st.view = 'results';
+  if (!st.review) {
+    const prev = cardBest(st.mode);
+    st.newBest = st.correct > prev;
+    if (st.newBest) {
+      store.shakesCards = store.shakesCards || {};
+      store.shakesCards[st.mode] = st.correct;
+      save();
+    }
+  }
+  renderShakes();
+}
+
+function renderShakes() {
+  activeList = null;
+  document.body.dataset.lview = shakes.view === 'cards' ? 'quiz' : 'home';
+  const head = navHeadHtml();
+  if (shakes.view === 'cards') {
+    panel.innerHTML = head + cardsPanelHtml();
+    listmain.innerHTML = cardsMainHtml();
+    updateCardsUI();
+    $('#cin')?.focus();
+  } else if (shakes.view === 'results') {
+    panel.innerHTML = head + cardsResultsPanelHtml();
+    listmain.innerHTML = cardsResultsMainHtml();
+  } else {
+    panel.innerHTML = head + shakesHomePanelHtml();
+    listmain.innerHTML = shakesGuideHtml();
+  }
+  window.scrollTo(0, 0);
+  listmain.scrollTop = 0;
+}
+
+function shakesHomePanelHtml() {
+  const best = cardBest(shakes.mode);
+  return `<div class="pscroll"><div class="ptitle">
+    <h1>Shakespeare</h1>
+    <p class="muted small">Learn the plays by their people and plots, then test yourself with flashcards.</p>
+    ${best ? `<p class="small">Best: <b>${best} / ${CARD_LEN}</b> · ${esc(CARD_MODES[shakes.mode].label)}</p>` : ''}
+  </div><div class="pbody">
+    <h3>Quiz mode</h3>
+    <div class="modes">${Object.entries(CARD_MODES).map(([id, m]) =>
+      `<button class="mode${id === shakes.mode ? ' on' : ''}" data-smode="${id}">${esc(m.label)}</button>`).join('')}</div>
+    <p class="muted small">${esc(CARD_MODES[shakes.mode].blurb)} ${CARD_LEN} cards per round.</p>
+    <h3>The canon</h3>
+    <p class="muted small">The 36 plays in the First Folio, plus <i>Pericles</i>, <i>The Two Noble Kinsmen</i>, and <i>Edward III</i>. Play types are approximate.</p>
+    ${store.shakesBest ? `<p class="small muted">List drill best: <b>${fmtTime(store.shakesBest.ms)}</b> · ${store.shakesBest.miss} revealed</p>` : ''}
+  </div></div><div class="pfoot"><div class="btns">
+    <button class="btn primary full" data-cact="start">Start ${CARD_LEN} cards</button>
+    <button class="btn ghost full" data-cact="list">Full list drill</button>
+  </div></div>`;
+}
+
+function playArticleHtml(p) {
+  const hay = [p.forms.join(''), norm(p.meta), norm(p.chars.join('')), norm(p.summary)].join('');
+  return `<article class="play" data-search="${hay}">
+    <h3>${esc(p.name)} <span class="date">(${esc(p.meta)})</span></h3>
+    <p class="chars"><span>Characters</span> ${p.chars.map(esc).join(' · ')}</p>
+    <p class="syn">${esc(p.summary)}</p>
+  </article>`;
+}
+
+function shakesGuideHtml() {
+  const types = ['Comedy', 'History', 'Tragedy', 'Romance'];
+  return `<div class="lmain guide">
+    <div class="guidebar">
+      <input id="gsearch" type="search" placeholder="Search plays, characters, or plots…" autocomplete="off" aria-label="Search the study guide">
+      <div class="jump">${types.map(t => `<button class="chip" data-jump="${t}">${t}</button>`).join('')}</div>
+    </div>
+    ${types.map(t => `<section class="gtype" id="g-${t}">
+      <h2>${t}</h2>
+      ${PLAYS.filter(p => p.tip === t).map(playArticleHtml).join('')}
+    </section>`).join('')}
+  </div>`;
+}
+
+function filterGuide(q) {
+  const needle = norm(q);
+  for (const sec of listmain.querySelectorAll('.gtype')) {
+    let shown = 0;
+    for (const art of sec.querySelectorAll('.play')) {
+      const hit = !needle || art.dataset.search.includes(needle);
+      art.hidden = !hit;
+      if (hit) shown++;
+    }
+    sec.hidden = !shown;
+  }
+}
+
+function cardHint(card) {
+  return card.kind === 'character' ? 'Which play is this character from?' :
+    card.kind === 'play' ? 'Name a character from this play.' : 'Which play is this?';
+}
+function cardPlaceholder(card) { return card.kind === 'play' ? 'Type a character…' : 'Type the play…'; }
+
+function cardsPanelHtml() {
+  const st = shakes, card = st.deck[st.i], n = st.deck.length;
+  return `<div class="pscroll"><div class="pbody">
+    <div class="qbar"><button class="back" data-cact="quit">✕ Quit</button><span id="cprog">Card ${st.i + 1} / ${n}</span></div>
+    <div class="bar"><i id="cbar" style="width:${100 * st.i / n}%"></i></div>
+    <div class="prompt" id="chint">${cardHint(card)}</div>
+  </div></div><div class="pfoot">
+    <div class="fb" id="cfb"></div>
+    <form class="qform" id="cform" autocomplete="off">
+      <input id="cin" name="answer" autocomplete="off" autocapitalize="words" autocorrect="off" spellcheck="false" enterkeyhint="done" placeholder="${cardPlaceholder(card)}">
+      <button class="btn primary">Check</button>
+    </form>
+    <div class="qrow"><span class="small muted" id="cscore">${st.correct} correct</span><button class="btn ghost" data-cact="next" id="cnext" hidden>Next</button></div>
+  </div>`;
+}
+
+function cardsMainHtml() {
+  const card = shakes.deck[shakes.i];
+  const kicker = { character: 'Character', play: 'Play', synopsis: 'Synopsis' }[card.kind];
+  return `<div class="lmain cards"><div class="fcard">
+    <div class="kicker">${kicker}</div>
+    <div class="ctext${card.kind === 'synopsis' ? ' syn' : ''}">${esc(card.prompt)}</div>
+  </div></div>`;
+}
+
+function updateCardsUI() {
+  const st = shakes;
+  const prog = $('#cprog'); if (prog) prog.textContent = `Card ${st.i + 1} / ${st.deck.length}`;
+  const bar = $('#cbar'); if (bar) bar.style.width = (100 * st.i / st.deck.length) + '%';
+  const score = $('#cscore'); if (score) score.textContent = `${st.correct} correct`;
+}
+
+function cardFb(html, cls) { const el = $('#cfb'); if (el) { el.innerHTML = html; el.className = 'fb ' + cls; } }
+
+function submitCard() {
+  const st = shakes;
+  if (st.view !== 'cards') return;
+  const card = st.deck[st.i];
+  const inp = $('#cin'); if (!inp || inp.disabled) return;
+  const guess = norm(inp.value);
+  if (!guess) return;
+
+  let ok = false, ambiguous = false;
+  if (card.kind === 'play') {
+    ok = matchPlayCharacter(card.play, guess);
+  } else {
+    const r = listMatchUnordered(LIST_MODULES.shakespeare, guess, new Set());
+    if (r.ambiguous) ambiguous = true;
+    else if (r.idx !== undefined) ok = r.idx === card.play.idx;
+  }
+  if (ambiguous) {
+    cardFb('More than one play fits — be more specific.', 'info');
+    inp.select();
+    return;
+  }
+
+  inp.disabled = true;
+  const btn = $('#cform button'); if (btn) btn.disabled = true;
+  if (ok) {
+    st.correct++;
+    cardFb(card.kind === 'play'
+      ? `✓ ${esc(card.play.chars[0])} is in ${esc(card.play.name)}`
+      : `✓ ${esc(card.play.name)}`, 'good');
+    updateCardsUI();
+    const at = st.i;
+    setTimeout(() => { if (shakes.view === 'cards' && shakes.i === at) nextCard(); }, 750);
+  } else {
+    st.missed.push(card);
+    cardFb(card.kind === 'play'
+      ? `✗ Characters include: ${esc(card.play.chars.slice(0, 4).join(', '))}`
+      : `✗ That's <b>${esc(card.play.name)}</b> (${esc(card.play.meta)})`, 'bad');
+    const next = $('#cnext'); if (next) next.hidden = false;
+    updateCardsUI();
+  }
+}
+
+function nextCard() {
+  const st = shakes;
+  if (st.view !== 'cards') return;
+  st.i++;
+  if (st.i >= st.deck.length) return finishCards();
+  renderShakes();
+}
+
+function cardsResultsPanelHtml() {
+  const st = shakes, total = st.deck.length;
+  return `<div class="pscroll"><div class="ptitle">
+    <h1>Round complete</h1>
+    <div class="score">${st.correct} / ${total}${st.newBest ? '<span class="newbest">New best</span>' : ''}</div>
+    <p class="muted">${esc(CARD_MODES[st.mode].label)}${st.review ? ' · review round' : ''}</p>
+  </div><div class="pbody">
+    <p class="small muted">${st.missed.length ? `${st.missed.length} card${st.missed.length === 1 ? '' : 's'} to review.` : 'Clean sweep — nothing missed.'}</p>
+  </div></div><div class="pfoot"><div class="btns">
+    <button class="btn primary full" data-cact="again">New round</button>
+    ${st.missed.length ? '<button class="btn ghost full" data-cact="review">Review missed</button>' : ''}
+    <button class="btn ghost full" data-cact="home">Back to study guide</button>
+  </div></div>`;
+}
+
+function cardsResultsMainHtml() {
+  const st = shakes;
+  if (!st.missed.length) return `<div class="lmain cards"><div class="empty">No missed cards. Try another mode or a fresh round.</div></div>`;
+  return `<div class="lmain cards"><h3>Missed cards</h3><ul class="missed">${st.missed.map(c => `
+    <li><div class="kicker">${c.kind === 'character' ? 'Character' : c.kind === 'play' ? 'Play' : 'Synopsis'}</div>
+    <div class="mprompt">${esc(c.prompt)}</div>
+    <div class="manswer">${c.kind === 'play' ? esc(c.play.chars.slice(0, 5).join(' · ')) : esc(c.play.name)}</div></li>`).join('')}</ul></div>`;
+}
+
+function startListDrill() {
+  listDrill = true;
+  shakes.view = 'home';
+  startList(LIST_MODULES.shakespeare);
+}
+
+function exitListDrill() {
+  const st = listSt(LIST_MODULES.shakespeare);
+  clearInterval(st.timer);
+  st.qz = null;
+  st.view = 'home';
+  listDrill = false;
+  activeList = null;
+  shakes.view = 'home';
+  renderShakes();
+}
+
+const CACTS = {
+  start: () => startCards(shakes.mode),
+  list: startListDrill,
+  quit: () => { shakes.view = 'home'; renderShakes(); },
+  next: nextCard,
+  again: () => startCards(shakes.mode),
+  review: () => { const missed = shakes.missed.slice(); startCards(shakes.mode, shuffle(missed)); },
+  home: () => { shakes.view = 'home'; renderShakes(); },
+};
+
+panel.addEventListener('click', e => {
+  const b = e.target.closest('[data-cact]');
+  if (b && !b.disabled) CACTS[b.dataset.cact]();
+});
+panel.addEventListener('click', e => {
+  const b = e.target.closest('[data-smode]');
+  if (!b) return;
+  shakes.mode = b.dataset.smode;
+  store.shakesMode = shakes.mode;
+  save();
+  renderShakes();
+});
+listmain.addEventListener('input', e => {
+  if (e.target.id === 'gsearch') filterGuide(e.target.value);
+});
+listmain.addEventListener('click', e => {
+  const b = e.target.closest('[data-jump]');
+  if (!b) return;
+  const gs = $('#gsearch');
+  if (gs && gs.value) { gs.value = ''; filterGuide(''); }
+  $('#g-' + b.dataset.jump)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
 
 document.addEventListener('keydown', e => {
