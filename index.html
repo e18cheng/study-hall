@@ -1500,6 +1500,14 @@ function listMatchUnordered(cfg, guess, found) {
     const i = exact.find(i => !found.has(i));
     return i === undefined ? { already: exact[0] } : { idx: i };
   }
+  // A partial title shared by several items (Henry IV, Henry VI, Richard) is ambiguous.
+  if (guess.length >= 4) {
+    const pref = new Set();
+    cfg.items.forEach((it, i) => {
+      if (it.forms.some(f => f.length > guess.length && f.startsWith(guess))) pref.add(i);
+    });
+    if (pref.size > 1) return { ambiguous: true };
+  }
   // Fuzzy only for typos, and only when one item is clearly the closest.
   let best = null;
   cfg.items.forEach((it, i) => {
