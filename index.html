@@ -155,7 +155,11 @@ input[autocomplete="off"]::-webkit-credentials-auto-fill-button {
 /* 9px left padding: the 30px hit area is wider than the 16px icon, so this lines the
    visible bars up with the 16px content edge below. */
 .phead { display: flex; align-items: center; gap: 2px; flex: none; padding: 6px 12px 6px 9px; border-bottom: 1px solid var(--border); }
-.phead .app { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.phead .brand { display: flex; align-items: center; gap: 7px; border: 0; background: none; padding: 3px 6px; border-radius: 8px;
+  font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.phead .brand:hover { background: var(--chip); color: var(--text); }
+.phead .brand:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.phead .brand img { width: 20px; height: 20px; display: block; }
 .navbtn { width: 30px; height: 30px; padding: 0; border: 0; background: none; border-radius: 8px;
   color: var(--muted); display: grid; place-items: center; }
 /* Drawn rather than the ☰ character: glyph side bearings differ between browsers and left
@@ -283,7 +287,7 @@ body[data-module="home"] #listmain { display: block; }
 @media (max-width: 760px) {
   body { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); }
   .phead { padding: 4px 12px 4px 9px; }
-  .phead .app { font-size: 10px; }
+  .phead .brand { font-size: 10px; }
   #nav { width: 260px; }
   #panel { border-right: 0; border-bottom: 1px solid var(--border); }
   .pbody { padding: 12px 16px; }
@@ -1278,10 +1282,9 @@ function renderHome() {
 // ---------------------------------------------------------------------------
 // App switcher (Home / World / Presidents / Shakespeare)
 // ---------------------------------------------------------------------------
-const APP_LABEL = { home: 'Home', countries: 'World', presidents: 'Presidents', shakespeare: 'Shakespeare' };
 function navHeadHtml() {
   const open = document.body.classList.contains('nav-open');
-  return `<div class="phead"><button class="navbtn" data-nav-toggle aria-label="Open menu" aria-expanded="${open}"><svg class="navicon" viewBox="0 0 16 12" aria-hidden="true" focusable="false"><rect x="0" y="0" width="16" height="2" rx="1"/><rect x="0" y="5" width="16" height="2" rx="1"/><rect x="0" y="10" width="16" height="2" rx="1"/></svg></button><span class="app">${APP_LABEL[app]}</span></div>`;
+  return `<div class="phead"><button class="navbtn" data-nav-toggle aria-label="Open menu" aria-expanded="${open}"><svg class="navicon" viewBox="0 0 16 12" aria-hidden="true" focusable="false"><rect x="0" y="0" width="16" height="2" rx="1"/><rect x="0" y="5" width="16" height="2" rx="1"/><rect x="0" y="10" width="16" height="2" rx="1"/></svg></button><button class="brand" data-home aria-label="Study Hall home"><img src="favicon.svg" alt="" draggable="false"><span>Study Hall</span></button></div>`;
 }
 
 function setNav(open) {
@@ -1295,6 +1298,7 @@ $('#navScrim').addEventListener('click', () => setNav(false));
 $('#navClose').addEventListener('click', () => setNav(false));
 panel.addEventListener('click', e => {
   if (e.target.closest('[data-nav-toggle]')) setNav(true);
+  else if (e.target.closest('[data-home]')) setApp('home');
 });
 listmain.addEventListener('click', e => {
   const b = e.target.closest('[data-app]');

@@ -1,6 +1,6 @@
 # Study Hall Roadmap
 
-The app opens on a home page with a card for each live topic. Deep links (`#world`, `#presidents`, `#shakespeare`) survive a refresh, and the Home item in the menu returns to the picker.
+The app opens on a home page with a card for each live topic. Deep links (`#world`, `#presidents`, `#shakespeare`) survive a refresh, and the Home item in the menu or the Study Hall brand in the header returns to the picker.
 
 ## Modules
 
