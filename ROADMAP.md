@@ -25,7 +25,7 @@ The app opens on a home page with a card for each live topic. Deep links (`#worl
 ### 5. Shakespeare and Literature
 - Play to character, author to work, work to author
 - Extensions: famous opening lines (paraphrased), literary prizes, poets
-- Live now: play ↔ character and synopsis → play flashcards, plus the full plays guide and list drill.
+- Live now: play ↔ character and synopsis → play flashcards, plus the full plays guide and list drill. Plays can be marked memorized, and the flashcard pool can be limited to them.
 
 ### 6. Science
 - Periodic table: symbol to element, element to number

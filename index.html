@@ -261,6 +261,12 @@ body[data-module="home"] #listmain { display: block; }
 .play .chars { margin: 0 0 7px; font-size: 12.5px; color: var(--muted); }
 .play .chars span { margin-right: 4px; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
 .play .syn { margin: 0; font-size: 14px; line-height: 1.55; }
+.play h3 .mem { margin-left: auto; flex: none; padding: 3px 9px; border: 1px solid var(--border); border-radius: 999px;
+  background: none; color: var(--muted); font: inherit; font-size: 10px; font-weight: 700; letter-spacing: .05em;
+  text-transform: uppercase; cursor: pointer; }
+.play h3 .mem:hover { border-color: var(--accent); color: var(--accent); }
+.play h3 .mem.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent); }
+.play h3 .mem:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 
 /* Shakespeare: flashcards */
 .cards { display: flex; flex-direction: column; min-height: 100%; }
@@ -276,6 +282,8 @@ body[data-module="home"] #listmain { display: block; }
   font-size: 12.5px; font-weight: 600; text-align: left; }
 .mode:hover { border-color: var(--accent); }
 .mode.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent); }
+.mode:disabled { opacity: .45; cursor: not-allowed; }
+.mode:disabled:hover { border-color: var(--border); }
 
 .missed { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
 .missed li { padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--panel); }
@@ -500,7 +508,7 @@ for (const [cont, regs] of REGION_DEFS) {
 // Persistence (per browser)
 // ---------------------------------------------------------------------------
 const STORE_KEY = 'countrydrill.v1';
-const store = { selected: [], learned: [], best: {}, stats: {}, labels: true, terrRegions: [], hard: false };
+const store = { selected: [], learned: [], best: {}, stats: {}, labels: true, terrRegions: [], hard: false, shakesMemorized: [], shakesPool: 'all' };
 try { Object.assign(store, JSON.parse(localStorage.getItem(STORE_KEY)) || {}); } catch (e) {}
 if ('terr' in store) { // older versions had a single global toggle
   if (store.terr) store.terrRegions = Object.keys(REGIONS).filter(id => REGIONS[id].terr.length);
@@ -1250,10 +1258,16 @@ function homeMainHtml() {
   const pres = store.presBest
     ? `Best ${fmtTime(store.presBest.ms)}${store.presBest.miss ? ` · ${store.presBest.miss} revealed` : ' · clean run'}`
     : `${PRES.length} presidents in order`;
-  const best = Object.entries(CARD_MODES).map(([id, m]) => ({ n: cardBest(id), label: m.label }))
-    .filter(x => x.n).sort((a, b) => b.n - a.n)[0];
+  const bests = [];
+  for (const [id, m] of Object.entries(CARD_MODES)) {
+    const all = cardBest(id, 'all');
+    const mem = cardBest(id, 'memorized');
+    if (all) bests.push({ n: all, label: m.label, mem: false });
+    if (mem) bests.push({ n: mem, label: m.label, mem: true });
+  }
+  const best = bests.sort((a, b) => b.n - a.n)[0];
   const bits = [];
-  if (best) bits.push(`Cards ${best.n}/${CARD_LEN} · ${best.label}`);
+  if (best) bits.push(`Cards ${best.n}/${CARD_LEN} · ${best.label}${best.mem ? ' · memorized' : ''}`);
   if (store.shakesBest) bits.push(`List drill ${fmtTime(store.shakesBest.ms)}`);
   const shakes = bits.length ? bits.join(' · ') : `${PLAYS.length} plays · ${CARD_LEN}-card rounds`;
   const card = (id, icon, name, desc, prog) => `<button class="topic" data-app="${id}">
@@ -1700,6 +1714,11 @@ const PLAY_TYPES = [...new Set(PLAYS.map(p => p.tip))].map(name => ({
   name, cls: 'cat-' + name.toLowerCase().replace(/[^a-z]+/g, '-'),
 }));
 
+// Drop memorized names that no longer exist (for example after a canon edit).
+const PLAY_NAMES = new Set(PLAYS.map(p => p.name));
+store.shakesMemorized = (Array.isArray(store.shakesMemorized) ? store.shakesMemorized : [])
+  .filter(name => PLAY_NAMES.has(name));
+
 const LIST_MODULES = {
   presidents: {
     id: 'presidents', label: 'Presidents', title: 'US Presidents', noun: 'president',
@@ -2041,6 +2060,7 @@ let listDrill = false;
 const shakes = {
   view: 'home',
   mode: CARD_MODES[store.shakesMode] ? store.shakesMode : 'mixed',
+  pool: store.shakesPool === 'memorized' ? 'memorized' : 'all',
   deck: [], i: 0, correct: 0, missed: [], review: false, newBest: false,
 };
 
@@ -2065,17 +2085,27 @@ function matchPlayCharacter(p, guess) {
   return p.chars.some(c => charForms(c).some(f => f === guess || lev(guess, f) <= fuzzyLimit(f)));
 }
 
-function cardBest(mode) { return (store.shakesCards && store.shakesCards[mode]) || 0; }
+function cardBest(mode, pool = shakes.pool) {
+  const map = pool === 'memorized' ? store.shakesCardsMem : store.shakesCards;
+  return (map && map[mode]) || 0;
+}
 
-function allCardDecks() {
+function poolPlays(pool = shakes.pool) {
+  return pool === 'memorized'
+    ? PLAYS.filter(p => store.shakesMemorized.includes(p.name))
+    : PLAYS;
+}
+
+function allCardDecks(pool = shakes.pool) {
+  const source = poolPlays(pool);
   const chars = [], plays = [], syn = [];
   const where = new Map();
-  for (const p of PLAYS) for (const c of p.chars) {
+  for (const p of source) for (const c of p.chars) {
     const k = norm(c);
     if (!where.has(k)) where.set(k, new Set());
     where.get(k).add(p.idx);
   }
-  for (const p of PLAYS) {
+  for (const p of source) {
     for (const c of p.chars) {
       const k = norm(c);
       if (where.get(k).size !== 1) continue; // shared across plays
@@ -2089,8 +2119,8 @@ function allCardDecks() {
   return { chars, plays, syn };
 }
 
-function drawDeck(mode) {
-  const { chars, plays, syn } = allCardDecks();
+function drawDeck(mode, pool = shakes.pool) {
+  const { chars, plays, syn } = allCardDecks(pool);
   if (mode === 'characters') return shuffle(chars.slice()).slice(0, CARD_LEN);
   if (mode === 'plays') return shuffle(plays.slice()).slice(0, CARD_LEN);
   if (mode === 'synopsis') return shuffle(syn.slice()).slice(0, CARD_LEN);
@@ -2099,6 +2129,15 @@ function drawDeck(mode) {
     ...shuffle(plays.slice()).slice(0, 6),
     ...shuffle(syn.slice()).slice(0, 6),
   ]);
+}
+
+// How many cards a round can actually show for the selected mode and pool.
+function availableCards(mode = shakes.mode, pool = shakes.pool) {
+  const { chars, plays, syn } = allCardDecks(pool);
+  if (mode === 'characters') return Math.min(CARD_LEN, chars.length);
+  if (mode === 'plays') return Math.min(CARD_LEN, plays.length);
+  if (mode === 'synopsis') return Math.min(CARD_LEN, syn.length);
+  return Math.min(8, chars.length) + Math.min(6, plays.length) + Math.min(6, syn.length);
 }
 
 function startCards(mode = shakes.mode, deck) {
@@ -2117,12 +2156,14 @@ function startCards(mode = shakes.mode, deck) {
 function finishCards() {
   const st = shakes;
   st.view = 'results';
-  if (!st.review) {
-    const prev = cardBest(st.mode);
+  // Only a full, non-review round sets a best; short memorized-pool rounds are practice.
+  if (!st.review && st.deck.length >= CARD_LEN) {
+    const prev = cardBest(st.mode, st.pool);
     st.newBest = st.correct > prev;
     if (st.newBest) {
-      store.shakesCards = store.shakesCards || {};
-      store.shakesCards[st.mode] = st.correct;
+      const key = st.pool === 'memorized' ? 'shakesCardsMem' : 'shakesCards';
+      store[key] = store[key] || {};
+      store[key][st.mode] = st.correct;
       save();
     }
   }
@@ -2149,30 +2190,69 @@ function renderShakes() {
   listmain.scrollTop = 0;
 }
 
+// Repaint only the quiz panel, so marking a play does not reset the guide's scroll.
+function refreshShakesHome() {
+  if (app !== 'shakespeare' || shakes.view !== 'home' || listDrill) return;
+  panel.innerHTML = navHeadHtml() + shakesHomePanelHtml();
+}
+
+function toggleMemorized(name) {
+  if (!PLAY_NAMES.has(name)) return;
+  const set = new Set(store.shakesMemorized);
+  if (set.has(name)) set.delete(name); else set.add(name);
+  store.shakesMemorized = [...set];
+  if (!store.shakesMemorized.length && shakes.pool === 'memorized') {
+    shakes.pool = 'all';
+    store.shakesPool = 'all';
+  }
+  save();
+  const btn = [...listmain.querySelectorAll('[data-smem]')].find(b => b.dataset.smem === name);
+  if (btn) {
+    const on = set.has(name);
+    btn.classList.toggle('on', on);
+    btn.setAttribute('aria-pressed', String(on));
+    btn.title = on ? 'Marked as memorized' : 'Mark this play as memorized';
+    btn.textContent = on ? '★ Memorized' : '☆ Memorized';
+  }
+  refreshShakesHome();
+}
+
 function shakesHomePanelHtml() {
+  const mem = store.shakesMemorized.length;
+  const avail = availableCards(shakes.mode);
+  const round = Math.min(avail, CARD_LEN);
   const best = cardBest(shakes.mode);
+  const poolName = shakes.pool === 'memorized' ? 'memorized plays' : 'all plays';
   return `<div class="pscroll"><div class="ptitle">
     <h1>Shakespeare</h1>
     <p class="muted small">Learn the plays by their people and plots, then test yourself with flashcards.</p>
-    ${best ? `<p class="small">Best: <b>${best} / ${CARD_LEN}</b> · ${esc(CARD_MODES[shakes.mode].label)}</p>` : ''}
+    ${best ? `<p class="small">Best: <b>${best} / ${CARD_LEN}</b> · ${esc(CARD_MODES[shakes.mode].label)} · ${poolName}</p>` : ''}
   </div><div class="pbody">
+    <h3>Play pool</h3>
+    <div class="modes">
+      <button class="mode${shakes.pool === 'all' ? ' on' : ''}" data-spool="all">All plays</button>
+      <button class="mode${shakes.pool === 'memorized' ? ' on' : ''}" data-spool="memorized"${mem ? '' : ' disabled'}>Memorized (${mem})</button>
+    </div>
+    <p class="muted small">${mem ? 'Quiz only the plays you mark as memorized in the study guide.' : 'Mark plays as memorized in the study guide to build a smaller quiz pool.'}</p>
     <h3>Quiz mode</h3>
     <div class="modes">${Object.entries(CARD_MODES).map(([id, m]) =>
       `<button class="mode${id === shakes.mode ? ' on' : ''}" data-smode="${id}">${esc(m.label)}</button>`).join('')}</div>
-    <p class="muted small">${esc(CARD_MODES[shakes.mode].blurb)} ${CARD_LEN} cards per round.</p>
+    <p class="muted small">${esc(CARD_MODES[shakes.mode].blurb)} ${round ? `${round} card${round === 1 ? '' : 's'} per round.` : 'No cards available in this pool.'}</p>
     <h3>The canon</h3>
     <p class="muted small">The 36 plays in the First Folio, plus <i>Pericles</i>, <i>The Two Noble Kinsmen</i>, and <i>Edward III</i>. Play types are approximate.</p>
+    <p class="muted small">The full list drill always covers all ${PLAYS.length} plays.</p>
     ${store.shakesBest ? `<p class="small muted">List drill best: <b>${fmtTime(store.shakesBest.ms)}</b> · ${store.shakesBest.miss} revealed</p>` : ''}
   </div></div><div class="pfoot"><div class="btns">
-    <button class="btn primary full" data-cact="start">Start ${CARD_LEN} cards</button>
+    <button class="btn primary full" data-cact="start"${avail ? '' : ' disabled'}>${avail ? `Start ${round} cards` : 'No cards available'}</button>
     <button class="btn ghost full" data-cact="list">Full list drill</button>
   </div></div>`;
 }
 
 function playArticleHtml(p) {
   const hay = [p.forms.join(''), norm(p.meta), norm(p.chars.join('')), norm(p.summary)].join('');
+  const mem = store.shakesMemorized.includes(p.name);
   return `<article class="play" data-search="${hay}">
-    <h3>${esc(p.name)} <span class="date">(${esc(p.meta)})</span></h3>
+    <h3>${esc(p.name)} <span class="date">(${esc(p.meta)})</span><button class="mem${mem ? ' on' : ''}" data-smem="${esc(p.name)}" aria-pressed="${mem}" title="${mem ? 'Marked as memorized' : 'Mark this play as memorized'}">${mem ? '★ Memorized' : '☆ Memorized'}</button></h3>
     <p class="chars"><span>Characters</span> ${p.chars.map(esc).join(' · ')}</p>
     <p class="syn">${esc(p.summary)}</p>
   </article>`;
@@ -2297,12 +2377,14 @@ function nextCard() {
 
 function cardsResultsPanelHtml() {
   const st = shakes, total = st.deck.length;
+  const poolName = st.pool === 'memorized' ? 'memorized plays' : 'all plays';
   return `<div class="pscroll"><div class="ptitle">
     <h1>Round complete</h1>
     <div class="score">${st.correct} / ${total}${st.newBest ? '<span class="newbest">New best</span>' : ''}</div>
-    <p class="muted">${esc(CARD_MODES[st.mode].label)}${st.review ? ' · review round' : ''}</p>
+    <p class="muted">${esc(CARD_MODES[st.mode].label)} · ${poolName}${st.review ? ' · review round' : ''}</p>
   </div><div class="pbody">
     <p class="small muted">${st.missed.length ? `${st.missed.length} card${st.missed.length === 1 ? '' : 's'} to review.` : 'Clean sweep — nothing missed.'}</p>
+    ${!st.review && total < CARD_LEN ? `<p class="small muted">Practice round — bests are recorded only for full ${CARD_LEN}-card rounds.</p>` : ''}
   </div></div><div class="pfoot"><div class="btns">
     <button class="btn primary full" data-cact="again">New round</button>
     ${st.missed.length ? '<button class="btn ghost full" data-cact="review">Review missed</button>' : ''}
@@ -2351,17 +2433,27 @@ panel.addEventListener('click', e => {
   if (b && !b.disabled) CACTS[b.dataset.cact]();
 });
 panel.addEventListener('click', e => {
-  const b = e.target.closest('[data-smode]');
-  if (!b) return;
-  shakes.mode = b.dataset.smode;
-  store.shakesMode = shakes.mode;
+  const m = e.target.closest('[data-smode]');
+  if (m) {
+    shakes.mode = m.dataset.smode;
+    store.shakesMode = shakes.mode;
+    save();
+    refreshShakesHome();
+    return;
+  }
+  const p = e.target.closest('[data-spool]');
+  if (!p || p.disabled) return;
+  shakes.pool = p.dataset.spool;
+  store.shakesPool = shakes.pool;
   save();
-  renderShakes();
+  refreshShakesHome();
 });
 listmain.addEventListener('input', e => {
   if (e.target.id === 'gsearch') filterGuide(e.target.value);
 });
 listmain.addEventListener('click', e => {
+  const mem = e.target.closest('[data-smem]');
+  if (mem) { toggleMemorized(mem.dataset.smem); return; }
   const b = e.target.closest('[data-jump]');
   if (!b) return;
   const gs = $('#gsearch');
