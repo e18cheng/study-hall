@@ -1,6 +1,6 @@
 # Study Hall Roadmap
 
-The app opens on a home page with a card for each live topic. Deep links (`#world`, `#presidents`, `#shakespeare`) survive a refresh, and the Home item in the menu or the Study Hall brand in the header returns to the picker.
+The app opens on a home page with a card for each live topic. Deep links (`#world`, `#presidents`, `#shakespeare`, `#elements`) survive a refresh, and the Home item in the menu or the Study Hall brand in the header returns to the picker.
 
 ## Modules
 
@@ -28,9 +28,9 @@ The app opens on a home page with a card for each live topic. Deep links (`#worl
 - Live now: play ↔ character and synopsis → play flashcards, plus the full plays guide and list drill. Plays can be marked memorized, and the flashcard pool can be limited to them.
 
 ### 6. Science
-- Periodic table: symbol to element, element to number
-- Famous scientists and their discoveries
-- Extensions: SI units, human body, planets and moons
+- Live now: a Periodic Table module with all 118 elements, category colors, group/period labels, lanthanide and actinide rows, a tap-to-study detail card, and three quizzes (symbol → name, name → symbol, and find the element on the table). Pools cover All, First 20, Common 40, Metals, Nonmetals, Noble gases, and Metalloids; progress and best scores are separate from other topics.
+- Next: element → atomic number, category and group drills, and a weak-spot review.
+- Extensions: famous scientists and their discoveries, SI units, human body, planets and moons
 
 ### 7. Arts and Music
 - Composer to famous works, painter to paintings

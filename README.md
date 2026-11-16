@@ -14,7 +14,7 @@ The libraries (`d3.min.js`, `topojson-client.min.js`) are checked in rather than
 
 ## Home page
 
-Opening the bare URL shows a home page with a card for each topic, its one-line description, and any progress saved on this device. Choosing a topic writes its hash (`#world`, `#presidents`, or `#shakespeare`) to the URL, so a refresh keeps you on that topic; choosing **Home** in the menu (or the Study Hall brand in the header) removes the hash and returns to the picker. Deep links can be shared.
+Opening the bare URL shows a home page with a card for each topic, its one-line description, and any progress saved on this device. Choosing a topic writes its hash (`#world`, `#presidents`, `#shakespeare`, or `#elements`) to the URL, so a refresh keeps you on that topic; choosing **Home** in the menu (or the Study Hall brand in the header) removes the hash and returns to the picker. Deep links can be shared.
 
 ## Topics
 
@@ -23,6 +23,7 @@ The menu on the left switches between study topics:
 - **World Geography** — study every country region by region: quiz it by clicking the map or typing the name, mark it as learned, then quiz all your learned regions together. Study mode can also show each country's capital, and two typing quizzes cover **country → capital** and **capital → country**. Capitals cover sovereign countries only (territories are excluded) and live in `CAPITAL_DEFS`, keyed by ISO code; the first form is the answer shown and every form is accepted. Capital progress is saved separately from country progress. Regions and territories are defined in `REGION_DEFS` / `TERR_DEFS` at the top of the script.
 - **US Presidents** — type all 47 presidents in order, Sporcle-style. Surnames, full names, and common nicknames (`JFK`, `Ike`, `FDR`) all count, and near-miss typos are accepted. The list is defined in `PRESIDENT_DEFS`, where order in the array is the answer order. A study list shows every president with term years and party; best time is saved in localStorage.
 - **Shakespeare** — a study guide for all 39 plays, plus typed-recall flashcards. Each play has its first performance, a handful of important characters, and a full plot summary. Mark plays as **memorized** in the guide to build a smaller quiz pool; the Play pool selector switches between all plays and memorized plays. Flashcards come in four modes: character → play, play → character, synopsis → play, and a balanced mix; a full round is 20 cards and accepts short forms and near-miss typos. Best scores are saved per mode and per pool, and only full 20-card rounds set a best. Missed cards can be reviewed. The canon is the 36 plays in the First Folio plus *Pericles*, *The Two Noble Kinsmen*, and *Edward III*. Guide content lives in `PLAY_GUIDE`, and the list itself in `PLAY_DEFS`. There is also a Sporcle-style drill: type all 39 plays in any order, with best time saved in localStorage.
+- **Periodic Table** — all 118 elements laid out as a real 18-column table, with the lanthanides and actinides on their own rows below. Tiles are colored by category and show the atomic number, symbol, and (when the table is wide enough) the name; tapping a tile opens a study card with mass, period, group, block, and electron configuration. Three quizzes cover **symbol → name**, **name → symbol**, and **find the element** (click it on the table). Pools are All, First 20, Common 40, Metals, Nonmetals, Noble gases, and Metalloids. The quiz engine reuses the three-try, hint, reveal, retry-missed, and best-score patterns from the other topics, with progress saved separately from countries, presidents, and Shakespeare. The dataset is `elements-data.js`; table colors and layout live in the elements CSS and `elemTableHtml` in `index.html`.
 
 Presidents and Shakespeare share one list-quiz engine. `LIST_MODULES` holds each module's items and labels, and `ordered: true` (presidents) advances one item at a time while unordered modules (Shakespeare) accept any remaining item. Adding another list topic means adding a definition and a `LIST_MODULES` entry, not another quiz implementation.
 
@@ -37,3 +38,7 @@ scripts/build-map.sh v5.1.2
 ```
 
 It needs `curl` and Node (`npx` fetches mapshaper on the fly; nothing is installed in the repo). After a new release, check that the overseas-territory splits (`SPLITS` in `index.html`) still pick up the right islands.
+
+## Element data
+
+`elements-data.js` is derived from [Periodic-Table-JSON](https://github.com/Bowserinator/Periodic-Table-JSON) by Bowserinator, licensed [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/). It is trimmed to elements 1–118 and reduced to the fields Study Hall uses: number, symbol, name, mass, category, period, group, grid position, block, and electron configuration. Element names use the dataset's spellings (for example *aluminium*, *caesium*, *sulfur*); the quizzes also accept the common variants *aluminum*, *cesium*, and *sulphur*.

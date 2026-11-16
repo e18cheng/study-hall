@@ -21,6 +21,10 @@
   --sea: #d6e4ed; --land-off: #ebe8e1; --land: #c3cbbb; --stroke: #ffffff; --halo: rgba(255,255,255,.85);
   --accent: #2f6fde; --accent-ink: #ffffff;
   --good: #2e9d5b; --ok: #d8b02c; --meh: #e07a30; --bad: #d64242;
+  --el-alkali: #f6c7c7; --el-alkaline: #f7d9b8; --el-transition: #f5e3a8;
+  --el-post: #d7e8b5; --el-metalloid: #bfe3d3; --el-nonmetal: #c8e6c9;
+  --el-noble: #d8cdf0; --el-lanthanide: #f4cfe0; --el-actinide: #e8cbe8;
+  --el-unknown: #e3e1da;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
@@ -29,6 +33,10 @@
     --sea: #142029; --land-off: #26272b; --land: #4a5247; --stroke: #121315; --halo: rgba(18,19,21,.85);
     --accent: #5b8ff0; --accent-ink: #0b1020;
     --good: #3fb26c; --ok: #d9b43c; --meh: #e58a45; --bad: #e05555;
+    --el-alkali: #5a2b2f; --el-alkaline: #5a4226; --el-transition: #514822;
+    --el-post: #354a27; --el-metalloid: #25443c; --el-nonmetal: #27452d;
+    --el-noble: #3d3457; --el-lanthanide: #533347; --el-actinide: #4b2f4d;
+    --el-unknown: #33343a;
     color-scheme: dark;
   }
 }
@@ -37,6 +45,10 @@
   --sea: #142029; --land-off: #26272b; --land: #4a5247; --stroke: #121315; --halo: rgba(18,19,21,.85);
   --accent: #5b8ff0; --accent-ink: #0b1020;
   --good: #3fb26c; --ok: #d9b43c; --meh: #e58a45; --bad: #e05555;
+  --el-alkali: #5a2b2f; --el-alkaline: #5a4226; --el-transition: #514822;
+  --el-post: #354a27; --el-metalloid: #25443c; --el-nonmetal: #27452d;
+  --el-noble: #3d3457; --el-lanthanide: #533347; --el-actinide: #4b2f4d;
+  --el-unknown: #33343a;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
@@ -296,6 +308,89 @@ body[data-module="home"] #listmain { display: block; }
 .missed .manswer { color: var(--good); font-weight: 600; }
 .empty { padding: 40px 0; color: var(--muted); text-align: center; }
 
+/* Periodic table */
+body[data-module="elements"] #mapwrap { display: none; }
+body[data-module="elements"] #listmain { display: block; }
+.emain { padding: 18px 20px 28px; }
+.etablewrap { overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; padding-bottom: 4px; container-type: inline-size; }
+.etable {
+  display: grid; grid-template-columns: 18px repeat(18, minmax(0, 1fr));
+  grid-template-rows: 16px repeat(7, 54px) 12px repeat(2, 54px);
+  gap: 3px; width: 100%; min-width: 0;
+}
+.eghead, .eperiod { font-size: 10px; color: var(--muted); display: grid; place-items: center; font-variant-numeric: tabular-nums; }
+.eel { position: relative; border: 1px solid rgba(0,0,0,.10); border-radius: 6px; padding: 2px 3px;
+  display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden;
+  min-width: 0; background: var(--chip); color: var(--text); transition: transform .08s ease, box-shadow .08s ease; }
+.eel:hover { transform: translateY(-1px); box-shadow: 0 3px 10px rgba(0,0,0,.14); z-index: 2; }
+.eel:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; z-index: 4; }
+.eel .enum { position: absolute; top: 1px; left: 3px; font-size: 8.5px; line-height: 1;
+  color: color-mix(in srgb, var(--text) 60%, transparent); font-variant-numeric: tabular-nums; }
+.eel .esym { font-size: 18px; font-weight: 700; line-height: 1.05; letter-spacing: -.02em; }
+.eel .ename { font-size: 7.5px; line-height: 1.1; max-width: 100%; overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap; color: color-mix(in srgb, var(--text) 68%, transparent); }
+.eel .dot { position: absolute; top: 3px; right: 3px; width: 5px; height: 5px; }
+.eel.selected { outline: 2px solid var(--accent); outline-offset: 1px; z-index: 3;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 18%, transparent); }
+.eel.off { opacity: .3; pointer-events: none; }
+.eel.flash { animation: eflash .7s; }
+.eel.flashgood { animation: eflashgood .7s; }
+@keyframes eflash { 30%, 70% { background: var(--bad); color: #fff; } }
+@keyframes eflashgood { 20%, 60% { background: var(--good); color: #fff; } }
+.eel.alkali { background: var(--el-alkali); } .eel.alkaline { background: var(--el-alkaline); }
+.eel.transition { background: var(--el-transition); } .eel.post { background: var(--el-post); }
+.eel.metalloid { background: var(--el-metalloid); } .eel.nonmetal { background: var(--el-nonmetal); }
+.eel.noble { background: var(--el-noble); } .eel.lanthanide { background: var(--el-lanthanide); }
+.eel.actinide { background: var(--el-actinide); } .eel.unknown { background: var(--el-unknown); }
+.nocolor .eel { background: var(--chip); }
+.eph { border: 1px dashed color-mix(in srgb, var(--text) 24%, transparent); border-radius: 6px;
+  display: grid; place-items: center; font-size: 9.5px; color: var(--muted);
+  background: color-mix(in srgb, var(--panel) 35%, transparent); }
+.estar { grid-column: 1; font-size: 11px; color: var(--muted); display: grid; place-items: center; }
+.elegend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin-top: 12px;
+  font-size: 11.5px; color: var(--muted); }
+.elegend span { display: inline-flex; align-items: center; gap: 5px; }
+.esw { width: 10px; height: 10px; border-radius: 3px; border: 1px solid rgba(0,0,0,.08); flex: none; }
+.esw.alkali { background: var(--el-alkali); } .esw.alkaline { background: var(--el-alkaline); }
+.esw.transition { background: var(--el-transition); } .esw.post { background: var(--el-post); }
+.esw.metalloid { background: var(--el-metalloid); } .esw.nonmetal { background: var(--el-nonmetal); }
+.esw.noble { background: var(--el-noble); } .esw.lanthanide { background: var(--el-lanthanide); }
+.esw.actinide { background: var(--el-actinide); } .esw.unknown { background: var(--el-unknown); }
+.elegend .fbl { margin-left: auto; }
+
+/* element study card */
+.ecard { border: 1px solid var(--border); border-radius: 12px; padding: 12px; background: var(--chip); }
+.ecard .erow { display: flex; align-items: baseline; gap: 10px; }
+.ecard .ebig { font-size: 28px; font-weight: 700; line-height: 1; }
+.ecard .esym { font-size: 18px; font-weight: 700; }
+.ecard .ecat { font-size: 12px; color: var(--muted); }
+.ecard dl { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; margin: 10px 0 0; font-size: 12.5px; }
+.ecard dt { color: var(--muted); }
+.ecard dd { margin: 0; }
+.ecard .ecfg { font-variant-numeric: tabular-nums; }
+
+/* element quiz */
+.epools .chip.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.estage { max-width: 540px; margin: 9vh auto 0; padding: 30px; border: 1px solid var(--border);
+  border-radius: 16px; background: var(--panel); box-shadow: 0 8px 30px rgba(0,0,0,.06); text-align: center; }
+.estage .ekicker { font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.estage .ebig { font-size: 56px; font-weight: 800; letter-spacing: -.03em; line-height: 1.05; margin: 12px 0 6px; }
+.estage .ebig.name { font-size: 38px; letter-spacing: -.01em; overflow-wrap: anywhere; }
+.estage .esub { color: var(--muted); font-size: 13px; }
+.prompt .esym { color: var(--accent); font-weight: 800; }
+.emissed { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.emissed li { display: flex; align-items: center; gap: 8px; padding: 6px 8px;
+  border: 1px solid var(--border); border-radius: 8px; background: var(--panel); }
+.emissed .enum { width: 26px; text-align: right; color: var(--muted); font-size: 11.5px; font-variant-numeric: tabular-nums; }
+.emissed .esym { width: 34px; font-weight: 700; }
+.emissed .ename { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Narrow tables keep the symbol and drop the name before the columns get too thin. */
+@container (max-width: 860px) {
+  .eel .ename { display: none; }
+  .eel .esym { font-size: 16px; }
+}
+
 @media (max-width: 760px) {
   body { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); }
   .phead { padding: 4px 12px 4px 9px; }
@@ -350,6 +445,30 @@ body[data-module="home"] #listmain { display: block; }
   body[data-module="list"][data-lview="quiz"] #listmain .lmain { padding: 0 16px; }
   body[data-module="list"][data-lview="quiz"] #llist { columns: 1; }
   body[data-module="list"][data-lview="quiz"] .pfoot { order: 3; position: static; flex: none; padding-bottom: calc(10px + env(safe-area-inset-bottom)); }
+  /* Periodic table: controls first, then the horizontally scrollable table. */
+  body[data-module="elements"]:not(.quizzing) .pbody { order: 3; }
+  body[data-module="elements"]:not(.quizzing) .pfoot { order: 4; position: static; box-shadow: none; }
+  body[data-module="elements"]:not(.quizzing) #listmain { order: 5; flex: 1 0 auto; overflow: visible; }
+  body[data-module="elements"]:not(.quizzing) #listmain .emain { padding: 12px 0 18px; }
+  body[data-module="elements"]:not(.quizzing) #listmain .etablewrap { padding: 0 12px; }
+  body[data-module="elements"]:not(.quizzing) #listmain .elegend { padding: 0 12px; }
+  .etable { grid-template-rows: 14px repeat(7, 44px) 10px repeat(2, 44px); min-width: 820px; }
+  .eel .esym { font-size: 15px; }
+  .eel .ename { font-size: 6.5px; }
+  .eel .enum { font-size: 8px; }
+  .estage { margin: 12px 16px 0; padding: 22px; }
+  .estage .ebig { font-size: 46px; }
+  .estage .ebig.name { font-size: 30px; }
+  /* Elements quiz: fixed shell, using the same visual-viewport trick as list quizzes. */
+  body[data-module="elements"][data-lview="quiz"] { display: flex; flex-direction: column; height: 100vh; height: var(--app-vh, 100vh); min-height: 0; overflow: hidden; background: var(--panel); }
+  body[data-module="elements"][data-lview="quiz"] #panel { display: contents; }
+  body[data-module="elements"][data-lview="quiz"] .phead { order: 0; }
+  body[data-module="elements"][data-lview="quiz"] .pscroll { order: 1; display: flex; flex-direction: column; flex: none; overflow: visible; }
+  body[data-module="elements"][data-lview="quiz"] .pbody { flex: none; overflow: visible; display: block; }
+  body[data-module="elements"][data-lview="quiz"] #listmain { order: 2; display: block; flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; background: var(--panel); }
+  body[data-module="elements"][data-lview="quiz"] .pfoot { order: 3; position: static; flex: none; padding-bottom: calc(10px + env(safe-area-inset-bottom)); }
+  body[data-module="elements"][data-lview="quiz"] .emain { padding: 10px 0 14px; }
+  body[data-module="elements"][data-lview="quiz"] .etablewrap { padding: 0 10px; }
   .btns { display: flex; flex-wrap: wrap; }
   .btns > * { flex: 1 1 0; min-width: 28%; padding: 10px 8px; }
   .btns > .full { flex-basis: 100%; }
@@ -391,6 +510,9 @@ body[data-module="home"] #listmain { display: block; }
   <button data-app="shakespeare" aria-label="Shakespeare">
     <span aria-hidden="true">🎭</span><span class="lbl">Shakespeare</span>
   </button>
+  <button data-app="elements" aria-label="Periodic Table">
+    <span aria-hidden="true">⚛️</span><span class="lbl">Elements</span>
+  </button>
 </nav>
 <aside id="panel"></aside>
 <main id="listmain"></main>
@@ -408,6 +530,7 @@ body[data-module="home"] #listmain { display: block; }
 <script src="d3.min.js"></script>
 <script src="topojson-client.min.js"></script>
 <script src="map-data.js"></script>
+<script src="elements-data.js"></script>
 <script>
 // ---------------------------------------------------------------------------
 // Regions. Edit freely: "code Name|alias|alias; ..." (code = ISO 3166 numeric,
@@ -766,7 +889,7 @@ if (missingCapitals.length) console.warn('Missing capitals:', missingCapitals);
 // Persistence (per browser)
 // ---------------------------------------------------------------------------
 const STORE_KEY = 'countrydrill.v1';
-const store = { selected: [], learned: [], best: {}, stats: {}, labels: true, terrRegions: [], hard: false, capStats: {}, capBest: {}, showCapitals: true, shakesMemorized: [], shakesPool: 'all' };
+const store = { selected: [], learned: [], best: {}, stats: {}, labels: true, terrRegions: [], hard: false, capStats: {}, capBest: {}, showCapitals: true, shakesMemorized: [], shakesPool: 'all', elemStats: {}, elemBest: {}, elemPool: 'all', elemNames: true, elemColors: true, elemSelected: 26 };
 try { Object.assign(store, JSON.parse(localStorage.getItem(STORE_KEY)) || {}); } catch (e) {}
 if ('terr' in store) { // older versions had a single global toggle
   if (store.terr) store.terrRegions = Object.keys(REGIONS).filter(id => REGIONS[id].terr.length);
@@ -1148,6 +1271,7 @@ function setView(v) {
 function render() {
   if (app === 'home') { activeList = null; return renderHome(); }
   if (app === 'shakespeare') { activeList = null; return renderShakes(); }
+  if (app === 'elements') { activeList = null; return renderElem(); }
   if (LIST_MODULES[app]) { activeList = app; return renderList(LIST_MODULES[app]); }
   const scroll = $('.pscroll', panel)?.scrollTop || 0;
   panel.innerHTML = navHeadHtml() + (view === 'home' ? homeHtml() : view === 'study' ? studyHtml() : view === 'quiz' ? quizHtml() : resultsHtml());
@@ -1267,9 +1391,9 @@ function quizHtml() {
   </div></div>`;
 }
 
-function tallyHtml() {
+function tallyHtml(res = q.res) {
   const n = { 1: 0, 2: 0, 3: 0, x: 0 };
-  for (const r of Object.values(q.res)) n[r]++;
+  for (const r of Object.values(res)) n[r]++;
   return `<span title="First try"><i class="dot r1"></i>${n[1]}</span><span title="Second try"><i class="dot r2"></i>${n[2]}</span>
     <span title="Third try"><i class="dot r3"></i>${n[3]}</span><span title="Missed"><i class="dot rx"></i>${n.x}</span>`;
 }
@@ -1408,6 +1532,7 @@ panel.addEventListener('submit', e => {
     else if (shakes.view === 'cards') submitCard();
     return;
   }
+  if (app === 'elements') { elemSubmit(); return; }
   if (LIST_MODULES[app]) submitList(LIST_MODULES[app]);
   else submitGuess();
 });
@@ -1599,6 +1724,7 @@ function homeMainHtml() {
       ${card('countries', '🌍', 'World Geography', 'Countries, regions, and territories on the map.', world)}
       ${card('presidents', '🏛️', 'US Presidents', 'Every president, in order, with terms and parties.', pres)}
       ${card('shakespeare', '🎭', 'Shakespeare', 'Characters, plots, and titles for all 39 plays.', shakes)}
+      ${card('elements', '⚛️', 'Periodic Table', '118 elements, their symbols, and the shape of the table.', elemHomeProgress())}
     </div>
   </div>`;
 }
@@ -1640,7 +1766,7 @@ listmain.addEventListener('click', e => {
 
 // Deep links: #world, #presidents and #shakespeare survive a refresh and can be shared.
 // A bare URL is the home page; choosing Home removes the hash again.
-const APP_SLUG = { home: '', countries: 'world', presidents: 'presidents', shakespeare: 'shakespeare' };
+const APP_SLUG = { home: '', countries: 'world', presidents: 'presidents', shakespeare: 'shakespeare', elements: 'elements' };
 const appFromHash = () => {
   const h = location.hash.replace(/^#\/?/, '');
   return Object.keys(APP_SLUG).find(k => h && APP_SLUG[k] === h) || 'home';
@@ -1658,9 +1784,16 @@ function syncHash(a) {
 function setApp(a) {
   if (!a) a = 'home';
   if (a === app) { syncHash(app); return; }
+  // Leaving the periodic table abandons its quiz; unlike the map there is no
+  // background target to keep painted, and the timer should not keep running.
+  if (app === 'elements' && a !== 'elements') {
+    clearInterval(elem.timer);
+    elem.qz = null;
+    elem.view = 'home';
+  }
   app = a;
   document.body.dataset.app = a;
-  document.body.dataset.module = a === 'home' ? 'home' : LIST_MODULES[a] ? 'list' : 'map';
+  document.body.dataset.module = a === 'home' ? 'home' : a === 'elements' ? 'elements' : LIST_MODULES[a] ? 'list' : 'map';
   syncHash(a);
   // A quiz keeps running in the background while another topic is on screen.
   document.body.classList.toggle('quizzing', a === 'countries' && view === 'quiz');
@@ -1677,6 +1810,14 @@ function setApp(a) {
     activeList = null;
     listDrill = false;
     renderShakes();
+  } else if (a === 'elements') {
+    clearInterval(elem.timer);
+    elem.qz = null;
+    elem.view = 'home';
+    activeList = null;
+    renderElem();
+    listmain.scrollTop = 0;
+    window.scrollTo(0, 0);
   } else if (LIST_MODULES[a]) {
     activeList = a;
     renderList(LIST_MODULES[a]);
@@ -2780,10 +2921,472 @@ listmain.addEventListener('click', e => {
   $('#g-' + b.dataset.jump)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
 
+// ---------------------------------------------------------------------------
+// Periodic table
+// ---------------------------------------------------------------------------
+// The table is a CSS grid, not SVG: every tile is a real button, so the same
+// markup works for study, "find the element", and result dots. Element data
+// comes from elements-data.js (Periodic-Table-JSON, CC BY-SA 3.0).
+const ELEMENTS = Array.isArray(window.ELEMENTS) ? window.ELEMENTS : [];
+const ELEMENT_BY_NUMBER = new Map(ELEMENTS.map(e => [e.n, e]));
+
+// Twenty familiar elements beyond the first twenty, for a manageable quiz pool.
+const ELEM_COMMON = new Set([
+  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+  22, 24, 25, 26, 27, 28, 29, 30, 35, 47, 50, 53, 54, 56, 74, 78, 79, 80, 82, 92,
+]);
+
+const ELEM_POOLS = {
+  all: { label: 'All', test: () => true },
+  first20: { label: 'First 20', test: e => e.n <= 20 },
+  common40: { label: 'Common 40', test: e => ELEM_COMMON.has(e.n) },
+  metals: {
+    label: 'Metals',
+    test: e => ['alkali', 'alkaline', 'transition', 'post', 'lanthanide', 'actinide'].includes(e.cat) ||
+      (e.cat === 'unknown' && /(transition|post-transition) metal/i.test(e.catName)),
+  },
+  nonmetals: {
+    label: 'Nonmetals',
+    test: e => e.cat === 'nonmetal' || (e.cat === 'unknown' && /nonmetal/i.test(e.catName)),
+  },
+  noble: {
+    label: 'Noble gases',
+    test: e => e.cat === 'noble' || /noble gas/i.test(e.catName),
+  },
+  metalloids: {
+    label: 'Metalloids',
+    test: e => e.cat === 'metalloid' || (e.cat === 'unknown' && /metalloid/i.test(e.catName)),
+  },
+};
+
+const ELEM_TASKS = {
+  sym: { label: 'Symbol → name', short: 'Symbol→name' },
+  name: { label: 'Name → symbol', short: 'Name→symbol' },
+  find: { label: 'Find the element', short: 'Find' },
+};
+
+// Dataset spellings are British; accept the common American forms too.
+const ELEM_ALIASES = {
+  aluminium: ['aluminum'], aluminum: ['aluminium'],
+  caesium: ['cesium'], cesium: ['caesium'],
+  sulfur: ['sulphur'], sulphur: ['sulfur'],
+};
+for (const e of ELEMENTS) e.forms = [norm(e.name), ...(ELEM_ALIASES[norm(e.name)] || [])];
+
+// Repair older saved stores and keep the selected element valid.
+if (!ELEM_POOLS[store.elemPool]) store.elemPool = 'all';
+if (!ELEMENT_BY_NUMBER.has(store.elemSelected)) {
+  store.elemSelected = ELEMENT_BY_NUMBER.has(26) ? 26 : (ELEMENTS[0]?.n || 1);
+}
+store.elemStats = store.elemStats && typeof store.elemStats === 'object' ? store.elemStats : {};
+store.elemBest = store.elemBest && typeof store.elemBest === 'object' ? store.elemBest : {};
+if (typeof store.elemNames !== 'boolean') store.elemNames = true;
+if (typeof store.elemColors !== 'boolean') store.elemColors = true;
+
+const elem = { view: 'home', qz: null, timer: null };
+
+function elemPoolNumbers(poolId = store.elemPool) {
+  const p = ELEM_POOLS[poolId] || ELEM_POOLS.all;
+  return ELEMENTS.filter(p.test).map(e => e.n);
+}
+const elemPoolLabel = (poolId = store.elemPool) => (ELEM_POOLS[poolId] || ELEM_POOLS.all).label;
+
+function elemHomeProgress() {
+  if (!ELEMENTS.length) return 'Element data unavailable';
+  const seen = ELEMENTS.filter(e => store.elemStats[e.n]).length;
+  const best = Object.values(store.elemBest).reduce((m, b) => Math.max(m, b?.pct || 0), 0);
+  return `${seen} / ${ELEMENTS.length} studied${best ? ` · best ${best}%` : ''}`;
+}
+
+function elemBestLine() {
+  const parts = Object.keys(ELEM_TASKS).map(task => {
+    const b = store.elemBest[`${task}:${store.elemPool}`];
+    return b ? `${ELEM_TASKS[task].short} ${b.pct}%` : null;
+  }).filter(Boolean);
+  return parts.length ? `Best in this pool: ${parts.join(' · ')}` : '';
+}
+
+const fmtMass = m => m == null ? '—' : String(Number(m.toFixed(3)));
+const fmtConfig = cfg => cfg ? esc(cfg).replace(/([spdfg])(\d+)/g, '$1<sup>$2</sup>') : '—';
+
+function elemCardHtml(n) {
+  const e = ELEMENT_BY_NUMBER.get(n) || ELEMENTS[0];
+  if (!e) return '';
+  return `<div class="erow"><span class="ebig">${e.n}</span><div>
+      <div class="esym">${esc(e.symbol)} · ${esc(e.name)}</div>
+      <div class="ecat">${esc(e.catName)}</div>
+    </div></div>
+    <dl>
+      <dt>Mass</dt><dd>${fmtMass(e.mass)} u</dd>
+      <dt>Period</dt><dd>${e.period}</dd>
+      <dt>Group</dt><dd>${e.block === 'f' ? '—' : e.group}</dd>
+      <dt>Block</dt><dd>${esc(e.block)}</dd>
+      <dt>Config</dt><dd class="ecfg">${fmtConfig(e.config)}</dd>
+    </dl>`;
+}
+
+function elemTableHtml() {
+  const qz = elem.view === 'quiz' ? elem.qz : null;
+  const find = qz && qz.task === 'find';
+  const active = find ? new Set(qz.queue) : null;
+  const showNames = store.elemNames && !find;
+  const selected = elem.view === 'home' ? store.elemSelected : null;
+  const tiles = ELEMENTS.map(e => {
+    const cls = ['eel', e.cat];
+    if (selected === e.n) cls.push('selected');
+    if (active && !active.has(e.n)) cls.push('off');
+    const res = store.elemStats[e.n]?.last;
+    const dot = res ? `<i class="dot ${resCls(res)}"></i>` : '';
+    const name = showNames ? `<span class="ename">${esc(e.name)}</span>` : '';
+    return `<button type="button" class="${cls.join(' ')}" data-el="${e.n}" style="grid-column:${e.x + 1};grid-row:${e.y + 1}" title="${esc(e.name)}">
+      <span class="enum">${e.n}</span>${dot}<span class="esym">${esc(e.symbol)}</span>${name}</button>`;
+  }).join('');
+  const groupLabels = Array.from({ length: 18 }, (_, i) =>
+    `<span class="eghead" style="grid-column:${i + 2};grid-row:1">${i + 1}</span>`).join('');
+  const periodLabels = Array.from({ length: 7 }, (_, i) =>
+    `<span class="eperiod" style="grid-column:1;grid-row:${i + 2}">${i + 1}</span>`).join('');
+  const stars = `<span class="estar" style="grid-row:10">*</span><span class="estar" style="grid-row:11">**</span>`;
+  const ph = `<span class="eph" style="grid-column:4;grid-row:7">57–71</span>
+    <span class="eph" style="grid-column:4;grid-row:8">89–103</span>`;
+  return `<div class="etable${store.elemColors ? '' : ' nocolor'}" role="grid" aria-label="Periodic table of the elements">
+    ${groupLabels}${periodLabels}${stars}${ph}${tiles}</div>`;
+}
+
+function elemLegendHtml() {
+  if (!store.elemColors) return `<div class="elegend"><span class="fbl">* Lanthanides &nbsp; ** Actinides</span></div>`;
+  const items = [
+    ['alkali', 'Alkali metal'], ['alkaline', 'Alkaline earth'], ['transition', 'Transition'],
+    ['post', 'Post-transition'], ['metalloid', 'Metalloid'], ['nonmetal', 'Nonmetal'],
+    ['noble', 'Noble gas'], ['lanthanide', 'Lanthanide'], ['actinide', 'Actinide'],
+    ['unknown', 'Unknown / predicted'],
+  ];
+  return `<div class="elegend">${items.map(([c, n]) => `<span><i class="esw ${c}"></i>${n}</span>`).join('')}
+    <span class="fbl">* Lanthanides &nbsp; ** Actinides</span></div>`;
+}
+
+const elemMainHtml = () => `<div class="emain"><div class="etablewrap">${elemTableHtml()}</div>${elemLegendHtml()}</div>`;
+const elemResultsMainHtml = () => `<div class="emain"><div class="etablewrap">${elemTableHtml()}</div>${elemLegendHtml()}</div>`;
+
+function elemQuizMainHtml() {
+  const qz = elem.qz;
+  if (!qz) return '';
+  if (qz.task === 'find') return `<div class="emain"><div class="etablewrap">${elemTableHtml()}</div></div>`;
+  if (!qz.target) return '';
+  const big = qz.task === 'sym' ? qz.target.symbol : qz.target.name;
+  return `<div class="emain"><div class="estage">
+    <div class="ekicker">${esc(ELEM_TASKS[qz.task].label)}</div>
+    <div class="ebig${qz.task === 'name' ? ' name' : ''}">${esc(big)}</div>
+    <div class="esub">${qz.task === 'sym' ? 'Type the element name' : 'Type the chemical symbol'}</div>
+  </div></div>`;
+}
+
+function elemHomePanelHtml() {
+  const n = elemPoolNumbers().length;
+  const best = elemBestLine();
+  return `<div class="pscroll"><div class="ptitle">
+    <h1>Periodic Table</h1>
+    <p class="muted small">${ELEMENTS.length} elements. Tap a tile to study it; dots show your last result.</p>
+  </div><div class="pbody">
+    <h3>Pool</h3>
+    <div class="quick epools">${Object.entries(ELEM_POOLS).map(([id, p]) =>
+      `<button class="chip${store.elemPool === id ? ' on' : ''}" data-epool="${id}">${esc(p.label)}</button>`).join('')}</div>
+    <p class="muted small">${n} element${n === 1 ? '' : 's'} in this pool.${best ? `<br>${esc(best)}` : ''}</p>
+    <h3>Study</h3>
+    <label class="tog"><input type="checkbox" data-enames ${store.elemNames ? 'checked' : ''}> Show names on tiles</label>
+    <p class="muted small">Names appear when the table is wide enough; narrow screens show symbols only.</p>
+    <label class="tog"><input type="checkbox" data-ecolors ${store.elemColors ? 'checked' : ''}> Color by category</label>
+    <h3>Selected element</h3>
+    <div class="ecard" id="ecard">${elemCardHtml(store.elemSelected)}</div>
+  </div></div><div class="pfoot"><div class="btns">
+    <button class="btn primary wide" data-eact="sym">Symbol → name</button>
+    <button class="btn" data-eact="name">Name → symbol</button>
+    <button class="btn" data-eact="find">Find the element</button>
+  </div></div>`;
+}
+
+function elemQuizPanelHtml() {
+  const qz = elem.qz;
+  if (!qz) return '';
+  const typing = qz.task !== 'find';
+  return `<div class="pscroll"><div class="pbody">
+    <div class="qbar"><button class="back" data-eact="quit">✕ Quit</button><span id="eprog"></span><span id="etime">0:00</span></div>
+    <div class="bar"><i id="ebar"></i></div>
+    <div class="prompt" id="eprompt"></div>
+    <div class="fb" id="efb"></div>
+  </div></div><div class="pfoot">
+    ${typing ? `<form class="qform" id="eform" autocomplete="off">
+      <input id="ein" name="answer" autocomplete="off" autocapitalize="${qz.task === 'sym' ? 'words' : 'off'}" autocorrect="off" spellcheck="false" enterkeyhint="done" placeholder="${qz.task === 'sym' ? 'Type the element name…' : 'Type the symbol…'}">
+      <button class="btn primary">Check</button></form>` : ''}
+    <div class="qrow"><div class="tally" id="etally"></div><button class="btn ghost" data-eact="reveal">Reveal</button></div>
+  </div>`;
+}
+
+function elemResultsPanelHtml() {
+  const qz = elem.qz;
+  if (!qz) return '';
+  const total = qz.queue.length;
+  const first = qz.queue.filter(n => qz.res[n] === 1).length;
+  const pct = Math.round(100 * first / total);
+  const missed = qz.queue.filter(n => qz.res[n] !== 1)
+    .sort((a, b) => (qz.res[a] === 'x' ? 0 : 1) - (qz.res[b] === 'x' ? 0 : 1) || a - b);
+  const rows = missed.map(n => {
+    const e = ELEMENT_BY_NUMBER.get(n);
+    return `<li><span class="enum">${e.n}</span><span class="esym">${esc(e.symbol)}</span>
+      <span class="ename">${esc(e.name)}</span><i class="dot ${resCls(qz.res[n])}"></i></li>`;
+  }).join('');
+  return `<div class="pscroll"><div class="ptitle"><button class="back" data-eact="home">← Table</button>
+    <h2>${esc(ELEM_TASKS[qz.task].label)} · ${esc(qz.poolName)}</h2></div><div class="pbody">
+    <div class="score">${pct}%${qz.newBest ? '<span class="newbest">New best</span>' : ''}</div>
+    <p class="muted">${first} of ${total} on the first try · ${fmtTime(qz.elapsed)}</p>
+    <div class="tally">${tallyHtml(qz.res)}</div>
+    ${missed.length ? `<h3>Review (${missed.length})</h3><ul class="emissed">${rows}</ul>`
+      : '<p>Perfect run. Every element on the first try.</p>'}
+  </div></div><div class="pfoot"><div class="btns">
+    ${missed.length ? `<button class="btn primary full" data-eact="retry">Retry the ${missed.length} I missed</button>` : ''}
+    <button class="btn" data-eact="again">Same quiz again</button>
+    <button class="btn" data-eact="other">${elemOtherLabel(qz.task)}</button>
+    <button class="btn ghost full" data-eact="home">Back to table</button>
+  </div></div>`;
+}
+
+function renderElem() {
+  if (!ELEMENTS.length) {
+    document.body.dataset.lview = 'home';
+    document.body.classList.remove('quizzing');
+    panel.innerHTML = navHeadHtml() + `<div class="pscroll"><div class="pbody"><p class="muted">Element data did not load. Check that <code>elements-data.js</code> is next to this page.</p></div></div>`;
+    listmain.innerHTML = '';
+    return;
+  }
+  document.body.dataset.lview = elem.view === 'quiz' ? 'quiz' : 'home';
+  document.body.classList.toggle('quizzing', app === 'elements' && elem.view === 'quiz');
+  const pscroll = $('.pscroll', panel)?.scrollTop || 0;
+  const tscroll = $('.etablewrap')?.scrollLeft || 0;
+  const head = navHeadHtml();
+  if (elem.view === 'quiz') {
+    panel.innerHTML = head + elemQuizPanelHtml();
+    listmain.innerHTML = elemQuizMainHtml();
+    updateElemUI();
+  } else if (elem.view === 'results') {
+    panel.innerHTML = head + elemResultsPanelHtml();
+    listmain.innerHTML = elemResultsMainHtml();
+  } else {
+    panel.innerHTML = head + elemHomePanelHtml();
+    listmain.innerHTML = elemMainHtml();
+  }
+  if (elem.view === 'home') {
+    const ps = $('.pscroll', panel);
+    if (ps) ps.scrollTop = pscroll;
+  }
+  const tw = $('.etablewrap');
+  if (tw) tw.scrollLeft = tscroll;
+  if (elem.view === 'quiz' && elem.qz?.task !== 'find') $('#ein')?.focus();
+}
+
+function updateElemUI() {
+  const qz = elem.qz;
+  if (!qz) return;
+  const done = Object.keys(qz.res).length, total = qz.queue.length;
+  const set = (id, txt) => { const el = $('#' + id); if (el) el.textContent = txt; };
+  set('eprog', `${Math.min(done + 1, total)} / ${total}`);
+  const bar = $('#ebar'); if (bar) bar.style.width = (100 * done / total) + '%';
+  const tally = $('#etally'); if (tally) tally.innerHTML = tallyHtml(qz.res);
+  const prompt = $('#eprompt');
+  if (prompt) prompt.innerHTML = !qz.target ? ''
+    : qz.task === 'find' ? `Click <b>${esc(qz.target.name)}</b>`
+    : qz.task === 'sym' ? `What element is <b class="esym">${esc(qz.target.symbol)}</b>?`
+    : `What is the symbol for <b>${esc(qz.target.name)}</b>?`;
+}
+
+function elemFb(html, cls) { const el = $('#efb'); if (el) { el.innerHTML = html; el.className = 'fb ' + cls; } }
+
+function flashElem(n, kind = 'bad') {
+  const el = listmain.querySelector(`[data-el="${n}"]`);
+  if (!el) return;
+  el.classList.remove('flash', 'flashgood');
+  void el.offsetWidth;
+  el.classList.add(kind === 'good' ? 'flashgood' : 'flash');
+}
+
+function elemSelect(n) {
+  if (!ELEMENT_BY_NUMBER.has(n)) return;
+  store.elemSelected = n;
+  save();
+  const card = $('#ecard');
+  if (card) card.innerHTML = elemCardHtml(n);
+  for (const el of listmain.querySelectorAll('.eel.selected')) el.classList.remove('selected');
+  listmain.querySelector(`[data-el="${n}"]`)?.classList.add('selected');
+}
+
+const elemOther = task => task === 'sym' ? 'name' : task === 'name' ? 'find' : 'sym';
+const elemOtherLabel = task => task === 'sym' ? 'Try name → symbol'
+  : task === 'name' ? 'Try find the element' : 'Try symbol → name';
+
+function elemStart(task, nums) {
+  if (!ELEM_TASKS[task] || !ELEMENTS.length) return;
+  const full = elemPoolNumbers();
+  const queue = nums ? nums.slice() : full;
+  if (!queue.length) return;
+  const review = !!nums && (queue.length !== full.length || queue.some(n => !full.includes(n)));
+  clearInterval(elem.timer);
+  elem.qz = {
+    task, queue: shuffle(queue), i: -1, tries: 0, res: {}, start: Date.now(), elapsed: 0,
+    bestKey: review ? null : `${task}:${store.elemPool}`,
+    poolName: review ? `Review · ${queue.length}` : elemPoolLabel(),
+    target: null, locked: false, newBest: false,
+  };
+  elem.view = 'quiz';
+  elemNext();
+  listmain.scrollTop = 0;
+  const tw = $('.etablewrap');
+  if (tw) tw.scrollLeft = 0;
+  elem.timer = setInterval(() => {
+    const el = $('#etime');
+    if (el && elem.qz) el.textContent = fmtTime(Date.now() - elem.qz.start);
+  }, 500);
+}
+
+function elemNext() {
+  const qz = elem.qz;
+  if (!qz) return;
+  qz.tries = 0;
+  qz.locked = false;
+  qz.i++;
+  if (qz.i >= qz.queue.length) return elemFinish();
+  qz.target = ELEMENT_BY_NUMBER.get(qz.queue[qz.i]);
+  renderElem();
+  if (qz.task !== 'find') $('#ein')?.focus();
+}
+
+function elemSetRes(n, r) {
+  const qz = elem.qz;
+  if (!qz) return;
+  qz.res[n] = r;
+  const st = store.elemStats[n] || (store.elemStats[n] = { n: 0, ok: 0 });
+  st.n++; if (r === 1) st.ok++; st.last = r;
+  save();
+}
+
+function elemNameMatch(guess, e) {
+  if (e.forms.includes(guess)) return true;
+  // An exact name of another element is wrong, even if it is one typo away.
+  if (ELEMENTS.some(x => x.n !== e.n && x.forms.includes(guess))) return false;
+  return e.forms.some(f => lev(guess, f) <= fuzzyLimit(f));
+}
+
+function elemSubmit() {
+  const qz = elem.qz;
+  if (!qz || qz.locked || qz.task === 'find') return;
+  const inp = $('#ein');
+  if (!inp) return;
+  const guess = norm(inp.value);
+  if (!guess) return;
+  const ok = qz.task === 'sym' ? elemNameMatch(guess, qz.target) : guess === qz.target.symbol.toLowerCase();
+  if (ok) {
+    elemSetRes(qz.target.n, qz.tries + 1);
+    elemFb(`✓ ${esc(qz.task === 'sym' ? qz.target.name : qz.target.symbol)}`, 'good');
+    elemNext();
+    return;
+  }
+  qz.tries++;
+  inp.classList.remove('shake'); void inp.offsetWidth; inp.classList.add('shake');
+  inp.select();
+  if (qz.tries >= 3) return elemFail();
+  const hint = qz.task === 'sym'
+    ? `starts with “${esc(qz.target.name[0])}”, ${qz.target.name.replace(/[^A-Za-z]/g, '').length} letters`
+    : `starts with “${esc(qz.target.symbol[0])}”`;
+  elemFb(qz.tries === 2 ? `✗ Hint: ${hint}` : '✗ Not quite — try again', 'bad');
+}
+
+function elemFail() {
+  const qz = elem.qz;
+  if (!qz || qz.locked || !qz.target) return;
+  qz.locked = true;
+  elemSetRes(qz.target.n, 'x');
+  if (qz.task === 'find') flashElem(qz.target.n, 'good');
+  elemFb(`It was <b>${esc(qz.task === 'sym' ? qz.target.name : qz.task === 'name' ? qz.target.symbol : qz.target.name)}</b>`, 'bad');
+  updateElemUI();
+  setTimeout(() => { if (elem.view === 'quiz' && elem.qz === qz) elemNext(); }, qz.task === 'find' ? 1400 : 1800);
+}
+
+function elemOnTile(n) {
+  const qz = elem.qz;
+  if (!qz || elem.view !== 'quiz' || qz.task !== 'find') { elemSelect(n); return; }
+  if (qz.locked || !qz.queue.includes(n)) return;
+  if (n === qz.target.n) {
+    elemSetRes(n, qz.tries + 1);
+    elemFb(`✓ ${esc(qz.target.name)}`, 'good');
+    flashElem(n, 'good');
+    elemNext();
+  } else {
+    qz.tries++;
+    flashElem(n);
+    elemFb(`✗ That's ${esc(ELEMENT_BY_NUMBER.get(n).name)}`, 'bad');
+    if (qz.tries >= 3) elemFail();
+  }
+}
+
+function elemFinish() {
+  const qz = elem.qz;
+  if (!qz) return;
+  clearInterval(elem.timer);
+  qz.elapsed = Date.now() - qz.start;
+  qz.target = null;
+  const first = qz.queue.filter(n => qz.res[n] === 1).length;
+  const pct = Math.round(100 * first / qz.queue.length);
+  if (qz.bestKey) {
+    const b = store.elemBest[qz.bestKey];
+    if (!b || pct > b.pct || (pct === b.pct && qz.elapsed < b.ms)) {
+      store.elemBest[qz.bestKey] = { pct, ms: qz.elapsed };
+      qz.newBest = !!b;
+      save();
+    }
+  }
+  elem.view = 'results';
+  renderElem();
+  listmain.scrollTop = 0;
+}
+
+const ELEM_ACTIONS = {
+  sym: () => elemStart('sym'),
+  name: () => elemStart('name'),
+  find: () => elemStart('find'),
+  quit: () => { clearInterval(elem.timer); elem.qz = null; elem.view = 'home'; renderElem(); listmain.scrollTop = 0; },
+  reveal: () => elemFail(),
+  retry: () => {
+    const qz = elem.qz;
+    if (qz) elemStart(qz.task, qz.queue.filter(n => qz.res[n] !== 1));
+  },
+  again: () => { const qz = elem.qz; if (qz) elemStart(qz.task, qz.queue); },
+  other: () => { const qz = elem.qz; if (qz) elemStart(elemOther(qz.task), qz.queue); },
+  home: () => { clearInterval(elem.timer); elem.qz = null; elem.view = 'home'; renderElem(); listmain.scrollTop = 0; },
+};
+
+panel.addEventListener('click', e => {
+  const b = e.target.closest('[data-eact]');
+  if (b && !b.disabled) { ELEM_ACTIONS[b.dataset.eact](b, e); return; }
+  const p = e.target.closest('[data-epool]');
+  if (p && !p.disabled) {
+    store.elemPool = p.dataset.epool;
+    save();
+    renderElem();
+  }
+});
+panel.addEventListener('change', e => {
+  const t = e.target;
+  if ('enames' in t.dataset) { store.elemNames = t.checked; save(); renderElem(); }
+  else if ('ecolors' in t.dataset) { store.elemColors = t.checked; save(); renderElem(); }
+});
+listmain.addEventListener('click', e => {
+  if (app !== 'elements') return;
+  const el = e.target.closest('[data-el]');
+  if (el) elemOnTile(+el.dataset.el);
+});
+
 document.addEventListener('keydown', e => {
   if (e.key !== 'Escape') return;
   if (document.body.classList.contains('nav-open')) { setNav(false); return; }
   if (app === 'countries' && view === 'quiz') failTarget();
+  else if (app === 'elements' && elem.view === 'quiz') elemFail();
 });
 
 // iOS Safari does not resize the layout viewport when the keyboard opens: only the visual
@@ -2793,7 +3396,8 @@ document.addEventListener('keydown', e => {
 const keepQuizAnchored = () => {
   const d = document.body.dataset;
   const quizzing = (d.module === 'list' && d.lview === 'quiz') ||
-    (d.app === 'countries' && d.view === 'quiz');
+    (d.app === 'countries' && d.view === 'quiz') ||
+    (d.app === 'elements' && d.lview === 'quiz');
   if (quizzing && window.scrollY) window.scrollTo(0, 0);
 };
 if (window.visualViewport) {
