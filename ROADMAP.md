@@ -5,8 +5,8 @@ The app opens on a home page with a card for each live topic. Deep links (`#worl
 ## Modules
 
 ### 1. World Capitals
-- Country to capital, and capital to country
-- Click the capital's country on the map
+- Live now (inside World Geography): country → capital and capital → country typing quizzes, capitals in the study list and map tooltip, and separate capital progress. Capitals cover sovereign countries only.
+- Next: click the capital's country on the map, a capital weak-spot drill, and capital progress on the home card.
 - Extensions: hard mode (tricky capitals like Canberra, Brasilia), list by region
 
 ### 2. US States and Capitals
