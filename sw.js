@@ -1,13 +1,18 @@
 // Bump CACHE whenever a release changes anything in ASSETS. The old worker keeps
 // serving the old cache until every tab using it is closed, so a version bump is what
 // makes the next launch pick up new files.
-const CACHE = 'study-hall-v18';
+const CACHE = 'study-hall-v20';
 
 // Relative paths: the site lives under /study-hall/ on GitHub Pages.
 const ASSETS = [
   './',
   './index.html',
   './styles.css',
+  './core.js',
+  './map.js',
+  './list.js',
+  './presidents.js',
+  './shakespeare.js',
   './app.js',
   './elements.js',
   './wars.js',

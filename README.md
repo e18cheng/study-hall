@@ -16,12 +16,16 @@ The libraries (`d3.min.js`, `topojson-client.min.js`) are checked in rather than
 
 - `index.html` — the shell: header, nav, map container, and script tags.
 - `styles.css` — all styles.
-- `app.js` — router, map, list engine, and the shared `SH` module registry.
+- `core.js` — shared state, persistence, the `SH` registry, and small helpers.
+- `map.js` — World Geography: map setup, study list, and map/capital quizzes.
+- `list.js` — the generic fixed-answer list engine.
+- `presidents.js`, `shakespeare.js` — list topics, plus Shakespeare's guide and flashcards.
 - `elements.js`, `wars.js` — topic modules that register themselves with `SH`.
-- `countries-data.js`, `presidents-data.js`, `shakespeare-data.js`, `elements-data.js`, `wars-data.js`, `map-data.js` — datasets loaded before `app.js`.
+- `app.js` — router, topic picker, navigation, boot, and the service-worker hook.
+- `countries-data.js`, `presidents-data.js`, `shakespeare-data.js`, `elements-data.js`, `wars-data.js`, `map-data.js` — datasets loaded before the code.
 - `sw.js`, `manifest.webmanifest` — offline support and install metadata.
 
-Scripts are classic (non-module) and share the global scope; load order matters: data files first, then `app.js`, then topic modules.
+Scripts are classic (non-module) and share the global scope; load order matters: data files, then `core.js`, then topic files, then `app.js` last.
 
 ## Home page
 
