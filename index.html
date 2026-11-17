@@ -391,6 +391,51 @@ body[data-module="elements"] #listmain { display: block; }
   .eel .esym { font-size: 16px; }
 }
 
+/* US Wars */
+body[data-module="wars"] #mapwrap { display: none; }
+body[data-module="wars"] #listmain { display: block; }
+.wmain { padding: 18px 20px 28px; }
+.wpools .chip.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+
+.wtimeline { display: grid; gap: 18px; }
+.wera { display: grid; gap: 10px; }
+.werahead { display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+  padding-bottom: 4px; border-bottom: 1px solid var(--border); }
+.werahead h3 { margin: 0; font-size: 12px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+.werahead span { font-size: 11.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.wlist { display: grid; gap: 10px; }
+.wcard { position: relative; border: 1px solid var(--border); border-left: 3px solid var(--accent);
+  border-radius: 10px; background: var(--panel); padding: 11px 13px 12px; }
+.wcard .whead { display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap; }
+.wcard .wyears { font-size: 12px; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
+.wcard .wname { margin: 0; font-size: 15px; font-weight: 700; }
+.wcard .dot { margin-left: auto; }
+.wcard .wmeta { margin-top: 5px; font-size: 12px; color: var(--muted); }
+.wcard .wsummary { margin: 7px 0 0; font-size: 13px; line-height: 1.45; }
+.wcard .woutcome { margin-top: 7px; font-size: 12px; color: var(--muted); }
+.wcard .wnote { margin-top: 4px; font-size: 11.5px; color: var(--muted); font-style: italic; }
+.wcard.missed { border-left-color: var(--bad); }
+.wcard.perfect { border-left-color: var(--good); }
+
+.wcontext { max-width: 560px; margin: 4px auto 0; color: var(--muted); font-size: 13px; line-height: 1.5; text-align: center; }
+
+.woptions { max-width: 620px; margin: 9vh auto 0; display: grid; gap: 10px; }
+.woption { width: 100%; text-align: left; padding: 16px 18px; border: 1px solid var(--border);
+  border-radius: 12px; background: var(--panel); color: var(--text); font-size: 16px; font-weight: 600;
+  cursor: pointer; transition: border-color .1s ease, background .1s ease, transform .08s ease; }
+.woption:hover { border-color: var(--accent); transform: translateY(-1px); }
+.woption:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.woption.correct { border-color: var(--good); background: color-mix(in srgb, var(--good) 14%, var(--panel)); }
+.woption.wrong { border-color: var(--bad); background: color-mix(in srgb, var(--bad) 12%, var(--panel)); }
+.woption:disabled { cursor: default; }
+
+.wmissed { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.wmissed li { display: flex; align-items: baseline; gap: 8px; padding: 7px 9px;
+  border: 1px solid var(--border); border-radius: 8px; background: var(--panel); }
+.wmissed .wyears { min-width: 92px; color: var(--muted); font-size: 11.5px; font-variant-numeric: tabular-nums; }
+.wmissed .wname { flex: 1; min-width: 0; }
+.wmissed .wans { color: var(--good); font-size: 12px; }
+
 @media (max-width: 760px) {
   body { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); }
   .phead { padding: 4px 12px 4px 9px; }
@@ -469,6 +514,25 @@ body[data-module="elements"] #listmain { display: block; }
   body[data-module="elements"][data-lview="quiz"] .pfoot { order: 3; position: static; flex: none; padding-bottom: calc(10px + env(safe-area-inset-bottom)); }
   body[data-module="elements"][data-lview="quiz"] .emain { padding: 10px 0 14px; }
   body[data-module="elements"][data-lview="quiz"] .etablewrap { padding: 0 10px; }
+  /* US Wars: controls first, then the timeline. */
+  body[data-module="wars"]:not(.quizzing) .pbody { order: 3; }
+  body[data-module="wars"]:not(.quizzing) .pfoot { order: 4; position: static; box-shadow: none; }
+  body[data-module="wars"]:not(.quizzing) #listmain { order: 5; flex: 1 0 auto; overflow: visible; }
+  body[data-module="wars"]:not(.quizzing) #listmain .wmain { padding: 12px 0 18px; }
+  body[data-module="wars"]:not(.quizzing) #listmain .wtimeline { padding: 0 12px; }
+  body[data-module="wars"]:not(.quizzing) .pfoot .btn { white-space: nowrap; font-size: 13px; }
+  .wcontext { margin: 12px 16px 0; }
+  .woptions { margin: 12px 16px 0; }
+  .woption { padding: 14px 15px; font-size: 15px; }
+  /* Wars quiz: fixed shell, same visual-viewport trick as list quizzes. */
+  body[data-module="wars"][data-lview="quiz"] { display: flex; flex-direction: column; height: 100vh; height: var(--app-vh, 100vh); min-height: 0; overflow: hidden; background: var(--panel); }
+  body[data-module="wars"][data-lview="quiz"] #panel { display: contents; }
+  body[data-module="wars"][data-lview="quiz"] .phead { order: 0; }
+  body[data-module="wars"][data-lview="quiz"] .pscroll { order: 1; display: flex; flex-direction: column; flex: none; overflow: visible; }
+  body[data-module="wars"][data-lview="quiz"] .pbody { flex: none; overflow: visible; display: block; }
+  body[data-module="wars"][data-lview="quiz"] #listmain { order: 2; display: block; flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; background: var(--panel); }
+  body[data-module="wars"][data-lview="quiz"] .pfoot { order: 3; position: static; flex: none; padding-bottom: calc(10px + env(safe-area-inset-bottom)); }
+  body[data-module="wars"][data-lview="quiz"] .wmain { padding: 10px 0 14px; }
   .btns { display: flex; flex-wrap: wrap; }
   .btns > * { flex: 1 1 0; min-width: 28%; padding: 10px 8px; }
   .btns > .full { flex-basis: 100%; }
@@ -513,6 +577,9 @@ body[data-module="elements"] #listmain { display: block; }
   <button data-app="elements" aria-label="Periodic Table">
     <span aria-hidden="true">⚛️</span><span class="lbl">Elements</span>
   </button>
+  <button data-app="wars" aria-label="US Wars">
+    <span aria-hidden="true">⚔️</span><span class="lbl">Wars</span>
+  </button>
 </nav>
 <aside id="panel"></aside>
 <main id="listmain"></main>
@@ -531,6 +598,7 @@ body[data-module="elements"] #listmain { display: block; }
 <script src="topojson-client.min.js"></script>
 <script src="map-data.js"></script>
 <script src="elements-data.js"></script>
+<script src="wars-data.js"></script>
 <script>
 // ---------------------------------------------------------------------------
 // Regions. Edit freely: "code Name|alias|alias; ..." (code = ISO 3166 numeric,
@@ -889,7 +957,7 @@ if (missingCapitals.length) console.warn('Missing capitals:', missingCapitals);
 // Persistence (per browser)
 // ---------------------------------------------------------------------------
 const STORE_KEY = 'countrydrill.v1';
-const store = { selected: [], learned: [], best: {}, stats: {}, labels: true, terrRegions: [], hard: false, capStats: {}, capBest: {}, showCapitals: true, shakesMemorized: [], shakesPool: 'all', elemStats: {}, elemBest: {}, elemPool: 'all', elemNames: true, elemColors: true, elemSelected: 26 };
+const store = { selected: [], learned: [], best: {}, stats: {}, labels: true, terrRegions: [], hard: false, capStats: {}, capBest: {}, showCapitals: true, shakesMemorized: [], shakesPool: 'all', elemStats: {}, elemBest: {}, elemPool: 'all', elemNames: true, elemColors: true, elemSelected: 26, warStats: {}, warBest: {}, warPool: 'core' };
 try { Object.assign(store, JSON.parse(localStorage.getItem(STORE_KEY)) || {}); } catch (e) {}
 if ('terr' in store) { // older versions had a single global toggle
   if (store.terr) store.terrRegions = Object.keys(REGIONS).filter(id => REGIONS[id].terr.length);
@@ -1272,6 +1340,7 @@ function render() {
   if (app === 'home') { activeList = null; return renderHome(); }
   if (app === 'shakespeare') { activeList = null; return renderShakes(); }
   if (app === 'elements') { activeList = null; return renderElem(); }
+  if (app === 'wars') { activeList = null; return renderWar(); }
   if (LIST_MODULES[app]) { activeList = app; return renderList(LIST_MODULES[app]); }
   const scroll = $('.pscroll', panel)?.scrollTop || 0;
   panel.innerHTML = navHeadHtml() + (view === 'home' ? homeHtml() : view === 'study' ? studyHtml() : view === 'quiz' ? quizHtml() : resultsHtml());
@@ -1533,6 +1602,7 @@ panel.addEventListener('submit', e => {
     return;
   }
   if (app === 'elements') { elemSubmit(); return; }
+  if (app === 'wars') { warSubmit(); return; }
   if (LIST_MODULES[app]) submitList(LIST_MODULES[app]);
   else submitGuess();
 });
@@ -1725,6 +1795,7 @@ function homeMainHtml() {
       ${card('presidents', '🏛️', 'US Presidents', 'Every president, in order, with terms and parties.', pres)}
       ${card('shakespeare', '🎭', 'Shakespeare', 'Characters, plots, and titles for all 39 plays.', shakes)}
       ${card('elements', '⚛️', 'Periodic Table', '118 elements, their symbols, and the shape of the table.', elemHomeProgress())}
+      ${card('wars', '⚔️', 'US Wars', 'The major wars, their dates, presidents, and opponents.', warHomeProgress())}
     </div>
   </div>`;
 }
@@ -1766,7 +1837,7 @@ listmain.addEventListener('click', e => {
 
 // Deep links: #world, #presidents and #shakespeare survive a refresh and can be shared.
 // A bare URL is the home page; choosing Home removes the hash again.
-const APP_SLUG = { home: '', countries: 'world', presidents: 'presidents', shakespeare: 'shakespeare', elements: 'elements' };
+const APP_SLUG = { home: '', countries: 'world', presidents: 'presidents', shakespeare: 'shakespeare', elements: 'elements', wars: 'wars' };
 const appFromHash = () => {
   const h = location.hash.replace(/^#\/?/, '');
   return Object.keys(APP_SLUG).find(k => h && APP_SLUG[k] === h) || 'home';
@@ -1791,9 +1862,14 @@ function setApp(a) {
     elem.qz = null;
     elem.view = 'home';
   }
+  if (app === 'wars' && a !== 'wars') {
+    clearInterval(war.timer);
+    war.qz = null;
+    war.view = 'home';
+  }
   app = a;
   document.body.dataset.app = a;
-  document.body.dataset.module = a === 'home' ? 'home' : a === 'elements' ? 'elements' : LIST_MODULES[a] ? 'list' : 'map';
+  document.body.dataset.module = a === 'home' ? 'home' : a === 'elements' ? 'elements' : a === 'wars' ? 'wars' : LIST_MODULES[a] ? 'list' : 'map';
   syncHash(a);
   // A quiz keeps running in the background while another topic is on screen.
   document.body.classList.toggle('quizzing', a === 'countries' && view === 'quiz');
@@ -1816,6 +1892,14 @@ function setApp(a) {
     elem.view = 'home';
     activeList = null;
     renderElem();
+    listmain.scrollTop = 0;
+    window.scrollTo(0, 0);
+  } else if (a === 'wars') {
+    clearInterval(war.timer);
+    war.qz = null;
+    war.view = 'home';
+    activeList = null;
+    renderWar();
     listmain.scrollTop = 0;
     window.scrollTo(0, 0);
   } else if (LIST_MODULES[a]) {
@@ -3382,11 +3466,466 @@ listmain.addEventListener('click', e => {
   if (el) elemOnTile(+el.dataset.el);
 });
 
+// ---------------------------------------------------------------------------
+// US Wars
+// ---------------------------------------------------------------------------
+const WARS = Array.isArray(window.WARS) ? window.WARS : [];
+const WAR_BY_ID = new Map(WARS.map(w => [w.id, w]));
+
+const WAR_POOLS = {
+  core: { label: 'Core 12', test: w => w.core },
+  all: { label: 'All conflicts', test: () => true },
+};
+
+const WAR_TASKS = {
+  years: { label: 'War → years', short: 'War→years', type: 'choice' },
+  name: { label: 'Years → war', short: 'Years→war', type: 'choice' },
+  president: { label: 'War → president', short: 'War→president', type: 'type' },
+  opponent: { label: 'War → opponent', short: 'War→opponent', type: 'type' },
+};
+const WAR_TASK_ORDER = ['years', 'name', 'president', 'opponent'];
+
+const WAR_ERAS = [
+  { id: 'founding', label: 'Founding era', range: '1754–1815' },
+  { id: 'expansion', label: 'Expansion and union', range: '1846–1902' },
+  { id: 'worldwars', label: 'World wars', range: '1917–1945' },
+  { id: 'coldwar', label: 'Cold War', range: '1947–1991' },
+  { id: 'postcold', label: 'Post-Cold War', range: '1990–present' },
+];
+
+// Common short forms for presidents whose full name is a mouthful.
+const PRESIDENT_ALIASES = {
+  'Franklin D. Roosevelt': ['fdr'],
+  'John F. Kennedy': ['jfk'],
+  'Lyndon B. Johnson': ['lbj'],
+  'Dwight D. Eisenhower': ['ike'],
+  'Theodore Roosevelt': ['teddy'],
+  'George H. W. Bush': ['george bush', 'bush sr', 'bush 41'],
+  'George W. Bush': ['george bush', 'bush jr', 'bush 43'],
+  'Joe Biden': ['joseph biden'],
+};
+const presidentForms = p => [norm(p), norm(p.split(' ').pop()), ...(PRESIDENT_ALIASES[p] || []).map(norm)];
+
+for (const w of WARS) {
+  w.opponentForms = (w.opponentForms || [w.opponent]).map(norm);
+}
+
+// Repair older saved stores and keep the pool valid.
+if (!WAR_POOLS[store.warPool]) store.warPool = 'core';
+store.warStats = store.warStats && typeof store.warStats === 'object' ? store.warStats : {};
+store.warBest = store.warBest && typeof store.warBest === 'object' ? store.warBest : {};
+
+const war = { view: 'home', qz: null, timer: null };
+
+function warPoolWars(poolId = store.warPool) {
+  const p = WAR_POOLS[poolId] || WAR_POOLS.core;
+  return WARS.filter(p.test);
+}
+const warPoolIds = (poolId = store.warPool) => warPoolWars(poolId).map(w => w.id);
+const warPoolLabel = (poolId = store.warPool) => (WAR_POOLS[poolId] || WAR_POOLS.core).label;
+
+function warHomeProgress() {
+  if (!WARS.length) return 'War data unavailable';
+  const seen = WARS.filter(w => store.warStats[w.id]).length;
+  const best = Object.values(store.warBest).reduce((m, b) => Math.max(m, b?.pct || 0), 0);
+  return `${seen} / ${WARS.length} studied${best ? ` · best ${best}%` : ''}`;
+}
+
+function warBestLine() {
+  const parts = Object.keys(WAR_TASKS).map(task => {
+    const b = store.warBest[`${task}:${store.warPool}`];
+    return b ? `${WAR_TASKS[task].short} ${b.pct}%` : null;
+  }).filter(Boolean);
+  return parts.length ? `Best in this pool: ${parts.join(' · ')}` : '';
+}
+
+const warPresidentText = w => w.presidents.length ? w.presidents.join(', ') : w.presidentNote;
+const warPresidentShort = w => {
+  if (!w.presidents.length) return w.presidentNote;
+  if (w.presidents.length <= 2) return w.presidents.join(' / ');
+  return `${w.presidents[0]} + ${w.presidents.length - 1} more`;
+};
+
+function warCardHtml(w) {
+  const res = store.warStats[w.id]?.last;
+  const cls = ['wcard'];
+  if (res === 'x') cls.push('missed');
+  else if (res === 1) cls.push('perfect');
+  return `<article class="${cls.join(' ')}" data-war="${w.id}">
+    <div class="whead">
+      <span class="wyears">${esc(w.years)}</span>
+      <h4 class="wname">${esc(w.name)}</h4>
+      ${res ? `<i class="dot ${resCls(res)}"></i>` : ''}
+    </div>
+    <div class="wmeta">Opponent: ${esc(w.opponent)} · President: ${esc(warPresidentText(w))}</div>
+    <p class="wsummary">${esc(w.summary)}</p>
+    <div class="woutcome">Outcome: ${esc(w.outcome)}</div>
+    ${w.note ? `<div class="wnote">${esc(w.note)}</div>` : ''}
+  </article>`;
+}
+
+function warTimelineHtml() {
+  const ids = new Set(warPoolIds());
+  const eras = WAR_ERAS.map(era => ({
+    ...era,
+    wars: WARS.filter(w => w.era === era.id && ids.has(w.id))
+      .sort((a, b) => a.start - b.start || a.end - b.end),
+  })).filter(era => era.wars.length);
+  return `<div class="wmain"><div class="wtimeline">
+    ${eras.map(era => `<section class="wera">
+      <div class="werahead"><h3>${esc(era.label)}</h3><span>${esc(era.range)}</span></div>
+      <div class="wlist">${era.wars.map(warCardHtml).join('')}</div>
+    </section>`).join('')}
+  </div></div>`;
+}
+
+const warMainHtml = () => warTimelineHtml();
+const warResultsMainHtml = () => warTimelineHtml();
+
+function warQuizMainHtml() {
+  const qz = war.qz;
+  if (!qz || !qz.target) return '';
+  if (WAR_TASKS[qz.task].type === 'choice') {
+    return `<div class="wmain"><div class="woptions">
+      ${qz.options.map((o, i) => `<button class="woption" data-wopt="${i}">${esc(o.text)}</button>`).join('')}
+    </div></div>`;
+  }
+  const w = qz.target;
+  const context = qz.task === 'president'
+    ? `${esc(w.years)} · Opponent: ${esc(w.opponent)}`
+    : `${esc(w.years)} · President: ${esc(w.presidents[0] || w.presidentNote)}`;
+  return `<div class="wmain"><div class="wcontext">${context}</div></div>`;
+}
+
+function warHomePanelHtml() {
+  const n = warPoolWars().length;
+  const best = warBestLine();
+  return `<div class="pscroll"><div class="ptitle">
+    <h1>US Wars</h1>
+    <p class="muted small">Study the timeline, then quiz yourself on dates, presidents, and opponents.</p>
+  </div><div class="pbody">
+    <h3>Pool</h3>
+    <div class="quick wpools">${Object.entries(WAR_POOLS).map(([id, p]) =>
+      `<button class="chip${store.warPool === id ? ' on' : ''}" data-wpool="${id}">${esc(p.label)}</button>`).join('')}</div>
+    <p class="muted small">${n} war${n === 1 ? '' : 's'} in this pool.${best ? `<br>${esc(best)}` : ''}</p>
+    <h3>Study</h3>
+    <p class="muted small">The timeline is grouped by era. Dots show your last result. The president quiz covers wars with a US president.</p>
+  </div></div><div class="pfoot"><div class="btns">
+    <button class="btn primary wide" data-wact="years">War → years</button>
+    <button class="btn" data-wact="name">Years → war</button>
+    <button class="btn" data-wact="president">War → president</button>
+    <button class="btn" data-wact="opponent">War → opponent</button>
+  </div></div>`;
+}
+
+function warQuizPanelHtml() {
+  const qz = war.qz;
+  if (!qz) return '';
+  const typing = WAR_TASKS[qz.task].type === 'type';
+  const placeholder = qz.task === 'president' ? 'Type a president…' : 'Type the opponent…';
+  return `<div class="pscroll"><div class="pbody">
+    <div class="qbar"><button class="back" data-wact="quit">✕ Quit</button><span id="wprog"></span><span id="wtime">0:00</span></div>
+    <div class="bar"><i id="wbar"></i></div>
+    <div class="prompt" id="wprompt"></div>
+    <div class="fb" id="wfb"></div>
+  </div></div><div class="pfoot">
+    ${typing ? `<form class="qform" id="wform" autocomplete="off">
+      <input id="win" name="answer" autocomplete="off" autocapitalize="words" autocorrect="off" spellcheck="false" enterkeyhint="done" placeholder="${placeholder}">
+      <button class="btn primary">Check</button></form>` : ''}
+    <div class="qrow"><div class="tally" id="wtally"></div><button class="btn ghost" data-wact="reveal">Reveal</button></div>
+  </div>`;
+}
+
+function warResultsPanelHtml() {
+  const qz = war.qz;
+  if (!qz) return '';
+  const total = qz.queue.length;
+  const first = qz.queue.filter(id => qz.res[id] === 1).length;
+  const pct = Math.round(100 * first / total);
+  const missed = qz.queue.filter(id => qz.res[id] !== 1)
+    .sort((a, b) => (qz.res[a] === 'x' ? 0 : 1) - (qz.res[b] === 'x' ? 0 : 1) || WAR_BY_ID.get(a).start - WAR_BY_ID.get(b).start);
+  const rows = missed.map(id => {
+    const w = WAR_BY_ID.get(id);
+    const ans = qz.task === 'president' ? warPresidentText(w)
+      : qz.task === 'opponent' ? w.opponent : '';
+    return `<li><span class="wyears">${esc(w.years)}</span><span class="wname">${esc(w.name)}</span>
+      ${ans ? `<span class="wans">${esc(ans)}</span>` : ''}<i class="dot ${resCls(qz.res[id])}"></i></li>`;
+  }).join('');
+  return `<div class="pscroll"><div class="ptitle"><button class="back" data-wact="home">← Timeline</button>
+    <h2>${esc(WAR_TASKS[qz.task].label)} · ${esc(qz.poolName)}</h2></div><div class="pbody">
+    <div class="score">${pct}%${qz.newBest ? '<span class="newbest">New best</span>' : ''}</div>
+    <p class="muted">${first} of ${total} on the first try · ${fmtTime(qz.elapsed)}</p>
+    <div class="tally">${tallyHtml(qz.res)}</div>
+    ${missed.length ? `<h3>Review (${missed.length})</h3><ul class="wmissed">${rows}</ul>`
+      : '<p>Perfect run. Every war on the first try.</p>'}
+  </div></div><div class="pfoot"><div class="btns">
+    ${missed.length ? `<button class="btn primary full" data-wact="retry">Retry the ${missed.length} I missed</button>` : ''}
+    <button class="btn" data-wact="again">Same quiz again</button>
+    <button class="btn" data-wact="other">${warOtherLabel(qz.task)}</button>
+    <button class="btn ghost full" data-wact="home">Back to timeline</button>
+  </div></div>`;
+}
+
+function renderWar() {
+  if (!WARS.length) {
+    document.body.dataset.lview = 'home';
+    document.body.classList.remove('quizzing');
+    panel.innerHTML = navHeadHtml() + `<div class="pscroll"><div class="pbody"><p class="muted">War data did not load. Check that <code>wars-data.js</code> is next to this page.</p></div></div>`;
+    listmain.innerHTML = '';
+    return;
+  }
+  document.body.dataset.lview = war.view === 'quiz' ? 'quiz' : 'home';
+  document.body.classList.toggle('quizzing', app === 'wars' && war.view === 'quiz');
+  const pscroll = $('.pscroll', panel)?.scrollTop || 0;
+  const head = navHeadHtml();
+  if (war.view === 'quiz') {
+    panel.innerHTML = head + warQuizPanelHtml();
+    listmain.innerHTML = warQuizMainHtml();
+    updateWarUI();
+  } else if (war.view === 'results') {
+    panel.innerHTML = head + warResultsPanelHtml();
+    listmain.innerHTML = warResultsMainHtml();
+  } else {
+    panel.innerHTML = head + warHomePanelHtml();
+    listmain.innerHTML = warMainHtml();
+  }
+  if (war.view === 'home') {
+    const ps = $('.pscroll', panel);
+    if (ps) ps.scrollTop = pscroll;
+  }
+  if (war.view === 'quiz' && WAR_TASKS[war.qz?.task]?.type === 'type') $('#win')?.focus();
+}
+
+function updateWarUI() {
+  const qz = war.qz;
+  if (!qz) return;
+  const done = Object.keys(qz.res).length, total = qz.queue.length;
+  const set = (id, txt) => { const el = $('#' + id); if (el) el.textContent = txt; };
+  set('wprog', `${Math.min(done + 1, total)} / ${total}`);
+  const bar = $('#wbar'); if (bar) bar.style.width = (100 * done / total) + '%';
+  const tally = $('#wtally'); if (tally) tally.innerHTML = tallyHtml(qz.res);
+  const prompt = $('#wprompt');
+  if (!prompt) return;
+  const w = qz.target;
+  prompt.innerHTML = !w ? ''
+    : qz.task === 'years' ? `Which years did the US fight the <b>${esc(w.name)}</b>?`
+    : qz.task === 'name' ? `Which war was fought in <b>${esc(w.years)}</b>?`
+    : qz.task === 'president' ? `Name a president who served during the <b>${esc(w.name)}</b>.`
+    : `Who did the US fight in the <b>${esc(w.name)}</b>?`;
+}
+
+function warFb(html, cls) { const el = $('#wfb'); if (el) { el.innerHTML = html; el.className = 'fb ' + cls; } }
+
+function warOptions(qz, target) {
+  const key = qz.task === 'years' ? 'years' : 'name';
+  const value = w => w[key];
+  const seen = new Set([value(target)]);
+  const others = [];
+  // Prefer distractors from this quiz's pool, then fall back to every war.
+  for (const source of [WARS.filter(w => qz.queue.includes(w.id)), WARS]) {
+    for (const w of shuffle(source)) {
+      if (others.length >= 3) break;
+      if (w.id === target.id) continue;
+      const v = value(w);
+      if (seen.has(v)) continue;
+      seen.add(v);
+      others.push(w);
+    }
+    if (others.length >= 3) break;
+  }
+  return shuffle([target, ...others]).map(w => ({ text: value(w), correct: w.id === target.id }));
+}
+
+function warSetRes(id, r) {
+  const qz = war.qz;
+  if (!qz) return;
+  qz.res[id] = r;
+  const st = store.warStats[id] || (store.warStats[id] = { n: 0, ok: 0 });
+  st.n++; if (r === 1) st.ok++; st.last = r;
+  save();
+}
+
+function warPresidentMatch(guess, w) {
+  for (const p of w.presidents) {
+    const forms = presidentForms(p);
+    if (forms.some(f => guess === f || lev(guess, f) <= fuzzyLimit(f))) return p;
+  }
+  return null;
+}
+
+function warOpponentMatch(guess, w) {
+  return w.opponentForms.some(f => guess === f || lev(guess, f) <= fuzzyLimit(f));
+}
+
+function warNext() {
+  const qz = war.qz;
+  if (!qz) return;
+  qz.tries = 0;
+  qz.locked = false;
+  qz.i++;
+  if (qz.i >= qz.queue.length) return warFinish();
+  qz.target = WAR_BY_ID.get(qz.queue[qz.i]);
+  qz.options = WAR_TASKS[qz.task].type === 'choice' ? warOptions(qz, qz.target) : null;
+  renderWar();
+  if (WAR_TASKS[qz.task].type === 'type') $('#win')?.focus();
+}
+
+function warSubmit() {
+  const qz = war.qz;
+  if (!qz || qz.locked || WAR_TASKS[qz.task].type !== 'type') return;
+  const inp = $('#win');
+  if (!inp) return;
+  const guess = norm(inp.value);
+  if (!guess) return;
+  const w = qz.target;
+  const matched = qz.task === 'president' ? warPresidentMatch(guess, w) : null;
+  const ok = qz.task === 'president' ? !!matched : warOpponentMatch(guess, w);
+  if (ok) {
+    warSetRes(w.id, qz.tries + 1);
+    warFb(`✓ ${esc(qz.task === 'president' ? matched : w.opponent)}`, 'good');
+    warNext();
+    return;
+  }
+  qz.tries++;
+  inp.classList.remove('shake'); void inp.offsetWidth; inp.classList.add('shake');
+  inp.select();
+  if (qz.tries >= 3) return warFail();
+  const hint = qz.task === 'president'
+    ? (w.presidents.length ? `one answer starts with “${esc(w.presidents[0][0])}”` : 'no US president')
+    : `starts with “${esc(w.opponent[0])}”`;
+  warFb(qz.tries === 2 ? `✗ Hint: ${hint}` : '✗ Not quite — try again', 'bad');
+}
+
+function warChoose(i) {
+  const qz = war.qz;
+  if (!qz || qz.locked || WAR_TASKS[qz.task].type !== 'choice') return;
+  const opt = qz.options?.[i];
+  if (!opt) return;
+  const btn = listmain.querySelector(`[data-wopt="${i}"]`);
+  if (opt.correct) {
+    qz.locked = true;
+    btn?.classList.add('correct');
+    warSetRes(qz.target.id, qz.tries + 1);
+    warFb('✓ Correct', 'good');
+    setTimeout(() => { if (war.view === 'quiz' && war.qz === qz) warNext(); }, 420);
+    return;
+  }
+  qz.tries++;
+  btn?.classList.add('wrong');
+  btn?.setAttribute('disabled', '');
+  warFb(`✗ That's ${esc(opt.text)}`, 'bad');
+  if (qz.tries >= 3) return warFail();
+}
+
+function warFail() {
+  const qz = war.qz;
+  if (!qz || qz.locked || !qz.target) return;
+  qz.locked = true;
+  const w = qz.target;
+  warSetRes(w.id, 'x');
+  if (WAR_TASKS[qz.task].type === 'choice') {
+    const correct = qz.options.findIndex(o => o.correct);
+    listmain.querySelector(`[data-wopt="${correct}"]`)?.classList.add('correct');
+    for (const b of listmain.querySelectorAll('.woption')) b.disabled = true;
+  }
+  const answer = qz.task === 'years' ? w.years
+    : qz.task === 'name' ? w.name
+    : qz.task === 'president' ? warPresidentShort(w)
+    : w.opponent;
+  warFb(`It was <b>${esc(answer)}</b>`, 'bad');
+  updateWarUI();
+  setTimeout(() => { if (war.view === 'quiz' && war.qz === qz) warNext(); }, 1600);
+}
+
+function warFinish() {
+  const qz = war.qz;
+  if (!qz) return;
+  clearInterval(war.timer);
+  qz.elapsed = Date.now() - qz.start;
+  qz.target = null;
+  qz.options = null;
+  const first = qz.queue.filter(id => qz.res[id] === 1).length;
+  const pct = Math.round(100 * first / qz.queue.length);
+  if (qz.bestKey) {
+    const b = store.warBest[qz.bestKey];
+    if (!b || pct > b.pct || (pct === b.pct && qz.elapsed < b.ms)) {
+      store.warBest[qz.bestKey] = { pct, ms: qz.elapsed };
+      qz.newBest = !!b;
+      save();
+    }
+  }
+  war.view = 'results';
+  renderWar();
+  listmain.scrollTop = 0;
+}
+
+const warOther = task => WAR_TASK_ORDER[(WAR_TASK_ORDER.indexOf(task) + 1) % WAR_TASK_ORDER.length];
+const warOtherLabel = task => `Try ${WAR_TASKS[warOther(task)].label.toLowerCase()}`;
+
+function warStart(task, ids) {
+  if (!WAR_TASKS[task] || !WARS.length) return;
+  let full = warPoolIds();
+  if (task === 'president') full = full.filter(id => WAR_BY_ID.get(id).presidents.length);
+  let queue = ids ? ids.slice() : full;
+  if (task === 'president') queue = queue.filter(id => WAR_BY_ID.get(id)?.presidents.length);
+  if (!queue.length) return;
+  const review = !!ids && (queue.length !== full.length || queue.some(id => !full.includes(id)));
+  clearInterval(war.timer);
+  const label = warPoolLabel();
+  war.qz = {
+    task, queue: shuffle(queue), i: -1, tries: 0, res: {}, start: Date.now(), elapsed: 0,
+    bestKey: review ? null : `${task}:${store.warPool}`,
+    poolName: review ? `Review · ${queue.length}`
+      : task === 'president' ? `${label} · ${queue.length} with a president` : label,
+    target: null, options: null, locked: false, newBest: false,
+  };
+  war.view = 'quiz';
+  warNext();
+  listmain.scrollTop = 0;
+  war.timer = setInterval(() => {
+    const el = $('#wtime');
+    if (el && war.qz) el.textContent = fmtTime(Date.now() - war.qz.start);
+  }, 500);
+}
+
+const WAR_ACTIONS = {
+  years: () => warStart('years'),
+  name: () => warStart('name'),
+  president: () => warStart('president'),
+  opponent: () => warStart('opponent'),
+  quit: () => { clearInterval(war.timer); war.qz = null; war.view = 'home'; renderWar(); listmain.scrollTop = 0; },
+  reveal: () => warFail(),
+  retry: () => {
+    const qz = war.qz;
+    if (qz) warStart(qz.task, qz.queue.filter(id => qz.res[id] !== 1));
+  },
+  again: () => { const qz = war.qz; if (qz) warStart(qz.task, qz.queue); },
+  other: () => { const qz = war.qz; if (qz) warStart(warOther(qz.task)); },
+  home: () => { clearInterval(war.timer); war.qz = null; war.view = 'home'; renderWar(); listmain.scrollTop = 0; },
+};
+
+panel.addEventListener('click', e => {
+  const b = e.target.closest('[data-wact]');
+  if (b && !b.disabled) { WAR_ACTIONS[b.dataset.wact](b, e); return; }
+  const p = e.target.closest('[data-wpool]');
+  if (p && !p.disabled) {
+    store.warPool = p.dataset.wpool;
+    save();
+    renderWar();
+  }
+});
+listmain.addEventListener('click', e => {
+  if (app !== 'wars') return;
+  const b = e.target.closest('[data-wopt]');
+  if (b) warChoose(+b.dataset.wopt);
+});
+
 document.addEventListener('keydown', e => {
   if (e.key !== 'Escape') return;
   if (document.body.classList.contains('nav-open')) { setNav(false); return; }
   if (app === 'countries' && view === 'quiz') failTarget();
   else if (app === 'elements' && elem.view === 'quiz') elemFail();
+  else if (app === 'wars' && war.view === 'quiz') warFail();
 });
 
 // iOS Safari does not resize the layout viewport when the keyboard opens: only the visual
@@ -3397,7 +3936,8 @@ const keepQuizAnchored = () => {
   const d = document.body.dataset;
   const quizzing = (d.module === 'list' && d.lview === 'quiz') ||
     (d.app === 'countries' && d.view === 'quiz') ||
-    (d.app === 'elements' && d.lview === 'quiz');
+    (d.app === 'elements' && d.lview === 'quiz') ||
+    (d.app === 'wars' && d.lview === 'quiz');
   if (quizzing && window.scrollY) window.scrollTo(0, 0);
 };
 if (window.visualViewport) {

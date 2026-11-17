@@ -1,6 +1,6 @@
 # Study Hall Roadmap
 
-The app opens on a home page with a card for each live topic. Deep links (`#world`, `#presidents`, `#shakespeare`, `#elements`) survive a refresh, and the Home item in the menu or the Study Hall brand in the header returns to the picker.
+The app opens on a home page with a card for each live topic. Deep links (`#world`, `#presidents`, `#shakespeare`, `#elements`, `#wars`) survive a refresh, and the Home item in the menu or the Study Hall brand in the header returns to the picker.
 
 ## Modules
 
@@ -47,3 +47,8 @@ The app opens on a home page with a card for each live topic. Deep links (`#worl
 ### 10. Word Origins and Wordplay
 - Etymology items
 - Extensions: Before and After puzzles, common prefixes and roots
+
+### 11. US Wars
+- Live now: a study timeline grouped by era, with years, opponent, president(s), outcome, and a short summary for each conflict. Pools are Core 12 and All conflicts (Core 12 plus the French and Indian, Northwest Indian, Barbary, Philippine–American, and Cold War). Four quizzes cover war → years, years → war, war → president, and war → opponent; the president quiz accepts any president who served during the war, and the opponent quiz accepts aliases. Progress and best scores are separate from every other topic.
+- Next: battle and treaty drills, a weak-spot review, and a "which war came first" ordering quiz.
+- Extensions: causes and consequences, key generals, home-front timeline, and a map of each war's theaters.

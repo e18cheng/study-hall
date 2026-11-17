@@ -4,17 +4,17 @@ A quiet place to memorize the facts that trivia nights and quiz bowls ask for. S
 
 Live: https://e18cheng.github.io/study-hall/
 
-A single static page (`index.html`). Progress is saved in your browser's localStorage.
+A static site (`index.html` plus its data files). Progress is saved in your browser's localStorage.
 
 ## Install and offline
 
-Study Hall is a PWA. On iOS, open the site in Safari and choose **Share → Add to Home Screen**. On Chrome/Android, use the install prompt. The first visit caches the page, map data, libraries, and icons, so the app keeps working offline; progress stays in localStorage.
+Study Hall is a PWA. On iOS, open the site in Safari and choose **Share → Add to Home Screen**. On Chrome/Android, use the install prompt. The first visit caches the page, data files, libraries, and icons, so the app keeps working offline; progress stays in localStorage.
 
 The libraries (`d3.min.js`, `topojson-client.min.js`) are checked in rather than loaded from a CDN so the app has no network dependency. The service worker lives in `sw.js`; bump `CACHE` there whenever a release changes any cached file, since an old worker keeps serving its cache until every tab using it is closed.
 
 ## Home page
 
-Opening the bare URL shows a home page with a card for each topic, its one-line description, and any progress saved on this device. Choosing a topic writes its hash (`#world`, `#presidents`, `#shakespeare`, or `#elements`) to the URL, so a refresh keeps you on that topic; choosing **Home** in the menu (or the Study Hall brand in the header) removes the hash and returns to the picker. Deep links can be shared.
+Opening the bare URL shows a home page with a card for each topic, its one-line description, and any progress saved on this device. Choosing a topic writes its hash (`#world`, `#presidents`, `#shakespeare`, `#elements`, or `#wars`) to the URL, so a refresh keeps you on that topic; choosing **Home** in the menu (or the Study Hall brand in the header) removes the hash and returns to the picker. Deep links can be shared.
 
 ## Topics
 
@@ -24,6 +24,7 @@ The menu on the left switches between study topics:
 - **US Presidents** — type all 47 presidents in order, Sporcle-style. Surnames, full names, and common nicknames (`JFK`, `Ike`, `FDR`) all count, and near-miss typos are accepted. The list is defined in `PRESIDENT_DEFS`, where order in the array is the answer order. A study list shows every president with term years and party; best time is saved in localStorage.
 - **Shakespeare** — a study guide for all 39 plays, plus typed-recall flashcards. Each play has its first performance, a handful of important characters, and a full plot summary. Mark plays as **memorized** in the guide to build a smaller quiz pool; the Play pool selector switches between all plays and memorized plays. Flashcards come in four modes: character → play, play → character, synopsis → play, and a balanced mix; a full round is 20 cards and accepts short forms and near-miss typos. Best scores are saved per mode and per pool, and only full 20-card rounds set a best. Missed cards can be reviewed. The canon is the 36 plays in the First Folio plus *Pericles*, *The Two Noble Kinsmen*, and *Edward III*. Guide content lives in `PLAY_GUIDE`, and the list itself in `PLAY_DEFS`. There is also a Sporcle-style drill: type all 39 plays in any order, with best time saved in localStorage.
 - **Periodic Table** — all 118 elements laid out as a real 18-column table, with the lanthanides and actinides on their own rows below. Tiles are colored by category and show the atomic number, symbol, and (when the table is wide enough) the name; tapping a tile opens a study card with mass, period, group, block, and electron configuration. Three quizzes cover **symbol → name**, **name → symbol**, and **find the element** (click it on the table). Pools are All, First 20, Common 40, Metals, Nonmetals, Noble gases, and Metalloids. The quiz engine reuses the three-try, hint, reveal, retry-missed, and best-score patterns from the other topics, with progress saved separately from countries, presidents, and Shakespeare. The dataset is `elements-data.js`; table colors and layout live in the elements CSS and `elemTableHtml` in `index.html`.
+- **US Wars** — a study timeline of America's major conflicts, grouped by era. Each card shows the years, opponent, president(s), outcome, and a short summary. Pools are **Core 12** (the major wars) and **All conflicts** (Core 12 plus the French and Indian, Northwest Indian, Barbary, Philippine–American, and Cold War). Four quizzes cover **war → years**, **years → war**, **war → president**, and **war → opponent**; the president quiz accepts any president who served during that war, not just the first, and the opponent quiz accepts aliases. The quiz engine reuses the three-try, hint, reveal, retry-missed, and best-score patterns, with progress saved separately from every other topic. The dataset is `wars-data.js`; the timeline and quiz engine live in `index.html`.
 
 Presidents and Shakespeare share one list-quiz engine. `LIST_MODULES` holds each module's items and labels, and `ordered: true` (presidents) advances one item at a time while unordered modules (Shakespeare) accept any remaining item. Adding another list topic means adding a definition and a `LIST_MODULES` entry, not another quiz implementation.
 
@@ -42,3 +43,7 @@ It needs `curl` and Node (`npx` fetches mapshaper on the fly; nothing is install
 ## Element data
 
 `elements-data.js` is derived from [Periodic-Table-JSON](https://github.com/Bowserinator/Periodic-Table-JSON) by Bowserinator, licensed [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/). It is trimmed to elements 1–118 and reduced to the fields Study Hall uses: number, symbol, name, mass, category, period, group, grid position, block, and electron configuration. Element names use the dataset's spellings (for example *aluminium*, *caesium*, *sulfur*); the quizzes also accept the common variants *aluminum*, *cesium*, and *sulphur*.
+
+## War data
+
+`wars-data.js` is a small curated dataset, not a generated one. Dates are years of US involvement rather than the full span of each conflict; Vietnam, for example, is labeled **1965–1973** with a note that the wider war ran 1955–1975. `presidents` lists everyone who served during that involvement, and the president quiz accepts any of them. The Cold War appears only in the **All conflicts** pool and is labeled a strategic conflict rather than a shooting war. `core: true` marks the Core 12; the remaining entries join them in All conflicts.
