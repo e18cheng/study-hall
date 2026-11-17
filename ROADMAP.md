@@ -4,6 +4,10 @@ The app opens on a home page with a card for each live topic. Deep links (`#worl
 
 ## Modules
 
+### US Presidents
+- Live now: four modes — presidents in order, president → VP, VP → president, and vice presidents in order — plus a study list that pairs each president with their vice presidents.
+- Next: election years, opposing candidates, and cabinet posts.
+
 ### 1. World Capitals
 - Live now (inside World Geography): country → capital and capital → country typing quizzes, capitals in the study list and map tooltip, and separate capital progress. Capitals cover sovereign countries only.
 - Next: click the capital's country on the map, a capital weak-spot drill, and capital progress on the home card.

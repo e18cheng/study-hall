@@ -638,17 +638,6 @@ panel.addEventListener('change', e => {
   }
   else if ('hard' in t.dataset) { store.hard = t.checked; save(); }
 });
-panel.addEventListener('submit', e => {
-  e.preventDefault();
-  if (app === 'shakespeare') {
-    if (listDrill) submitList(LIST_MODULES.shakespeare);
-    else if (shakes.view === 'cards') submitCard();
-    return;
-  }
-  if (SH.submit(app)) return;
-  if (LIST_MODULES[app]) submitList(LIST_MODULES[app]);
-  else submitGuess();
-});
 panel.addEventListener('pointerover', e => {
   const b = e.target.closest('[data-act=locate]');
   if (hovCode) setHover(hovCode, false);
@@ -783,34 +772,3 @@ function finish() {
   gFx.selectAll('*').remove();
   setView('results');
 }
-
-
-// ---------------------------------------------------------------------------
-// Map interactions
-// ---------------------------------------------------------------------------
-panel.addEventListener('click', e => {
-  const b = e.target.closest('[data-act]');
-  if (b && !b.disabled) ACTIONS[b.dataset.act](b, e);
-});
-panel.addEventListener('change', e => {
-  const t = e.target;
-  if (t.dataset.reg) toggleRegion(t.dataset.reg);
-  else if (t.dataset.cont) {
-    const ids = CONTINENTS.find(c => c.name === t.dataset.cont).regions.map(r => r.id);
-    const s = new Set(store.selected);
-    ids.forEach(id => t.checked ? s.add(id) : s.delete(id));
-    store.selected = [...s]; save(); paintAll(); render();
-  } else if ('labels' in t.dataset) { store.labels = t.checked; save(); rescale(); }
-  else if ('capitals' in t.dataset) {
-    store.showCapitals = t.checked; save();
-    for (const el of document.querySelectorAll('.clist')) el.classList.toggle('caps', t.checked);
-    for (const el of document.querySelectorAll('.clist .cap')) el.hidden = !t.checked;
-  }
-  else if ('hard' in t.dataset) { store.hard = t.checked; save(); }
-});
-panel.addEventListener('pointerover', e => {
-  const b = e.target.closest('[data-act=locate]');
-  if (hovCode) setHover(hovCode, false);
-  hovCode = b ? b.dataset.code : null;
-  if (hovCode) setHover(hovCode, true);
-});

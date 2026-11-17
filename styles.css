@@ -230,6 +230,8 @@ body[data-module="home"] #listmain { display: block; }
 .lrow .ln { width: 20px; text-align: right; color: var(--muted); font-size: 11.5px; font-variant-numeric: tabular-nums; flex: none; }
 .lrow .lname { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .lrow .lmeta { margin-left: auto; color: var(--muted); font-size: 11.5px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.lrow.has-sub { flex-wrap: wrap; }
+.lrow .lsub { flex-basis: 100%; margin-left: 27px; color: var(--muted); font-size: 11.5px; line-height: 1.3; white-space: normal; }
 .lrow .lline { flex: 1; border-bottom: 1px dashed var(--border); height: .9em; opacity: .55; }
 .lrow.cur { background: color-mix(in srgb, var(--accent) 12%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent); }
 .lrow.cur .ln { color: var(--accent); font-weight: 700; }

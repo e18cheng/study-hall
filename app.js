@@ -42,9 +42,10 @@ function homeMainHtml() {
   const world = learned
     ? `${learned} / ${regionCount} regions learned`
     : `${regionCount} regions · ${Object.keys(COUNTRY).length} places`;
-  const pres = store.presBest
-    ? `Best ${fmtTime(store.presBest.ms)}${store.presBest.miss ? ` · ${store.presBest.miss} revealed` : ' · clean run'}`
-    : `${PRES.length} presidents in order`;
+  const presBits = [];
+  presBits.push(store.presBest ? `Presidents ${fmtTime(store.presBest.ms)}` : `${PRES.length} presidents`);
+  presBits.push(store.vpBest ? `VPs ${fmtTime(store.vpBest.ms)}` : `${VPS.length} vice presidents`);
+  const pres = presBits.join(' · ');
   const bests = [];
   for (const [id, m] of Object.entries(CARD_MODES)) {
     const all = cardBest(id, 'all');
@@ -65,7 +66,7 @@ function homeMainHtml() {
     <h2>Choose a topic</h2>
     <div class="topics">
       ${card('countries', '🌍', 'World Geography', 'Countries, regions, and territories on the map.', world)}
-      ${card('presidents', '🏛️', 'US Presidents', 'Every president, in order, with terms and parties.', pres)}
+      ${card('presidents', '🏛️', 'US Presidents', 'Presidents and vice presidents, with terms and parties.', pres)}
       ${card('shakespeare', '🎭', 'Shakespeare', 'Characters, plots, and titles for all 39 plays.', shakes)}
       ${card('elements', '⚛️', 'Periodic Table', '118 elements, their symbols, and the shape of the table.', SH.homeProgress('elements'))}
       ${card('wars', '⚔️', 'US Wars', 'The major wars, their dates, presidents, and opponents.', SH.homeProgress('wars'))}

@@ -7,11 +7,31 @@ const listState = {};
 
 function addListModule(cfg) {
   LIST_MODULES[cfg.id] = cfg;
-  listState[cfg.id] = listState[cfg.id] || { view: 'home', qz: null, timer: null };
+  const st = listState[cfg.id] = listState[cfg.id] || { view: 'home', qz: null, timer: null };
+  if (cfg.modes) {
+    const saved = cfg.modeStoreKey ? store[cfg.modeStoreKey] : null;
+    st.mode = cfg.modes[saved] ? saved : cfg.defaultMode;
+  }
   return cfg;
 }
 
 const listSt = cfg => listState[cfg.id];
+
+// A module may offer several quiz modes over the same topic. Resolve the active
+// mode into a normal config so the rest of the engine does not need to know.
+function listCfg(base) {
+  if (base.__resolved) return base;
+  if (!base.modes) return base;
+  const st = listState[base.id];
+  const modeId = base.modes[st.mode] ? st.mode : base.defaultMode;
+  return { ...base, ...base.modes[modeId], id: base.id, modeId, modes: base.modes, __resolved: true };
+}
+
+function listModeHtml(cfg) {
+  if (!cfg.modes) return '';
+  return `<h3>Quiz mode</h3><div class="modes">${Object.entries(cfg.modes).map(([id, m]) =>
+    `<button class="mode${id === cfg.modeId ? ' on' : ''}" data-lmode="${id}">${esc(m.label)}</button>`).join('')}</div>`;
+}
 
 function listLegendHtml(cfg) {
   return `<h3>${esc(cfg.legendTitle)}</h3><ul class="llegend">${cfg.legend.map(g =>
@@ -21,9 +41,11 @@ function listLegendHtml(cfg) {
 function listRow(cfg, item, i) {
   const st = listSt(cfg), qz = st.qz;
   const quiz = st.view === 'quiz' && qz;
+  const sub = item.sub ? `<span class="lsub">${esc(item.sub)}</span>` : '';
+  const extra = item.sub ? ' has-sub' : '';
   if (!quiz) {
-    return `<li class="lrow done" title="${esc(item.tip)}"><span class="ln">${item.n}</span>
-      <span class="ldot ${item.cls}"></span><span class="lname">${esc(item.name)}</span><span class="lmeta">${esc(item.meta)}</span></li>`;
+    return `<li class="lrow done${extra}" title="${esc(item.tip)}"><span class="ln">${item.n}</span>
+      <span class="ldot ${item.cls}"></span><span class="lname">${esc(item.name)}</span><span class="lmeta">${esc(item.meta)}</span>${sub}</li>`;
   }
   const done = cfg.ordered ? i < qz.i : qz.found.has(i);
   const cur = cfg.ordered && i === qz.i;
@@ -31,11 +53,12 @@ function listRow(cfg, item, i) {
     return `<li class="lrow todo${cur ? ' cur' : ''}"><span class="ln">${item.n}</span><span class="lline"></span></li>`;
   }
   const miss = qz.revealed.has(i);
-  return `<li class="lrow done${cur ? ' cur' : ''}${miss ? ' miss' : ''}" title="${esc(item.tip)}">
+  return `<li class="lrow done${extra}${cur ? ' cur' : ''}${miss ? ' miss' : ''}" title="${esc(item.tip)}">
     <span class="ln">${item.n}</span><span class="ldot ${item.cls}"></span>
-    <span class="lname">${esc(item.name)}</span><span class="lmeta">${esc(item.meta)}</span></li>`;
+    <span class="lname">${esc(item.name)}</span><span class="lmeta">${esc(item.meta)}</span>${sub}</li>`;
 }
 const listRowsHtml = cfg => cfg.items.map((it, i) => listRow(cfg, it, i)).join('');
+const itemAnswer = item => item.answer || item.name;
 
 function listFb(html, cls) { const el = $('#lfb'); if (el) { el.innerHTML = html; el.className = 'fb ' + cls; } }
 function shakeEl(el) { el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); }
@@ -47,6 +70,7 @@ function listHomeHtml(cfg) {
     <p class="muted small">${cfg.blurb}</p>
     ${best ? `<p class="small">Your best: <b>${fmtTime(best.ms)}</b> · ${best.miss} revealed</p>` : ''}
   </div><div class="pbody">
+    ${listModeHtml(cfg)}
     ${listLegendHtml(cfg)}
     ${cfg.notesHtml || ''}
   </div></div><div class="pfoot"><div class="btns">
@@ -65,7 +89,7 @@ function listQuizHtml(cfg) {
     <div class="prompt" id="lprompt"></div>
     <div class="fb" id="lfb"></div>
   </div></div><div class="pfoot">
-    <form class="qform" autocomplete="off"><input id="lin" name="answer" autocomplete="off" autocapitalize="words" autocorrect="off" spellcheck="false" enterkeyhint="done" placeholder="Type your answer…"><button class="btn primary">Check</button></form>
+    <form class="qform" autocomplete="off"><input id="lin" name="answer" autocomplete="off" autocapitalize="words" autocorrect="off" spellcheck="false" enterkeyhint="done" placeholder="${esc(cfg.placeholder || 'Type your answer…')}"><button class="btn primary">Check</button></form>
     <div class="qrow"><div class="tally" id="ltally"></div><button class="btn ghost" data-pact="reveal">Reveal</button></div>
   </div>`;
 }
@@ -76,8 +100,9 @@ function listQuizMainHtml(cfg) {
 
 function listResultsHtml(cfg) {
   const qz = listSt(cfg).qz, miss = qz.revealed.size, total = cfg.items.length;
+  const done = cfg.doneLabel ? `All ${total} ${cfg.doneLabel} — done` : `All ${total} — done`;
   return `<div class="pscroll"><div class="ptitle">
-    <h1>All ${total} — done</h1>
+    <h1>${done}</h1>
     <div class="score">${fmtTime(qz.elapsed)}${qz.newBest ? '<span class="newbest">New best</span>' : ''}</div>
     <p class="muted">${total - miss} of ${total} typed without revealing${miss ? ` · ${miss} revealed` : ' · clean run'}</p>
   </div><div class="pbody">
@@ -92,7 +117,8 @@ function listResultsMainHtml(cfg) {
   return `<div class="lmain"><h3>${esc(cfg.resultsHeading)}</h3><ul class="lrows">${listRowsHtml(cfg)}</ul></div>`;
 }
 
-function renderList(cfg) {
+function renderList(base) {
+  const cfg = listCfg(base);
   const st = listSt(cfg);
   document.body.dataset.lview = st.view;
   const head = navHeadHtml();
@@ -144,7 +170,8 @@ function listMatchOrdered(cfg, guess, idx) {
   const item = cfg.items[idx];
   if (item.forms.includes(guess)) return { idx };
   // An exact name of some other item is wrong, no fuzzy credit (Adams ≠ Adams' typo).
-  if (cfg.items.some((x, j) => j !== idx && x.forms.includes(guess))) return { wrong: true };
+  // Cross-quizzes opt out: a shared surname is fine when it is unique to this prompt.
+  if (!cfg.allowSharedForms && cfg.items.some((x, j) => j !== idx && x.forms.includes(guess))) return { wrong: true };
   if (item.forms.some(f => lev(guess, f) <= fuzzyLimit(f))) return { idx };
   return { wrong: true };
 }
@@ -179,7 +206,8 @@ function listMatchUnordered(cfg, guess, found) {
   return found.has(best.idx) ? { already: best.idx } : { idx: best.idx };
 }
 
-function startList(cfg) {
+function startList(base) {
+  const cfg = listCfg(base);
   const st = listSt(cfg);
   activeList = cfg.id;
   clearInterval(st.timer);
@@ -193,7 +221,8 @@ function startList(cfg) {
   $('#lin')?.focus();
 }
 
-function submitList(cfg) {
+function submitList(base) {
+  const cfg = listCfg(base);
   const st = listSt(cfg), qz = st.qz;
   if (!qz || qz.done) return;
   const inp = $('#lin'); if (!inp) return;
@@ -206,7 +235,7 @@ function submitList(cfg) {
       const item = cfg.items[r.idx];
       inp.value = '';
       qz.i++;
-      listFb(`✓ ${esc(item.name)}`, 'good');
+      listFb(`✓ ${esc(itemAnswer(item))}`, 'good');
       if (qz.i >= cfg.items.length) return finishList(cfg);
       updateListUI(cfg);
       inp.focus();
@@ -214,7 +243,9 @@ function submitList(cfg) {
       qz.wrong++;
       shakeEl(inp);
       inp.select();
-      listFb(qz.wrong > 1 ? `✗ Still not #${cfg.items[qz.i].n}` : `✗ Not #${cfg.items[qz.i].n} — try again`, 'bad');
+      const item = cfg.items[qz.i], noun = cfg.noun || 'item';
+      listFb(cfg.wrongHtml ? cfg.wrongHtml(item)
+        : qz.wrong > 1 ? `✗ Still not ${noun} #${item.n}` : `✗ Not ${noun} #${item.n} — try again`, 'bad');
       updateListUI(cfg);
     }
     return;
@@ -224,12 +255,12 @@ function submitList(cfg) {
   if (r.idx !== undefined) {
     qz.found.add(r.idx);
     inp.value = '';
-    listFb(`✓ ${esc(cfg.items[r.idx].name)}`, 'good');
+    listFb(`✓ ${esc(itemAnswer(cfg.items[r.idx]))}`, 'good');
     if (qz.found.size >= cfg.items.length) return finishList(cfg);
     updateListUI(cfg);
     inp.focus();
   } else if (r.already !== undefined) {
-    listFb(`Already got <b>${esc(cfg.items[r.already].name)}</b>`, 'info');
+    listFb(`Already got <b>${esc(itemAnswer(cfg.items[r.already]))}</b>`, 'info');
     inp.select();
   } else if (r.ambiguous) {
     listFb('More than one play fits — be more specific.', 'info');
@@ -243,7 +274,8 @@ function submitList(cfg) {
   }
 }
 
-function revealList(cfg) {
+function revealList(base) {
+  const cfg = listCfg(base);
   const st = listSt(cfg), qz = st.qz;
   if (!qz || qz.done) return;
   let idx;
@@ -257,7 +289,8 @@ function revealList(cfg) {
   qz.revealed.add(idx);
   if (cfg.ordered) qz.i++;
   else qz.found.add(idx);
-  listFb(cfg.ordered ? `#${item.n} was <b>${esc(item.name)}</b>` : `<b>${esc(item.name)}</b>`, 'bad');
+  listFb(cfg.revealHtml ? cfg.revealHtml(item)
+    : cfg.ordered ? `#${item.n} was <b>${esc(itemAnswer(item))}</b>` : `<b>${esc(itemAnswer(item))}</b>`, 'bad');
   if ((cfg.ordered ? qz.i : qz.found.size) >= cfg.items.length) return finishList(cfg);
   updateListUI(cfg);
   $('#lin')?.focus();
@@ -276,7 +309,8 @@ function finishList(cfg) {
   renderList(cfg);
 }
 
-function quitList(cfg) {
+function quitList(base) {
+  const cfg = listCfg(base);
   const st = listSt(cfg);
   clearInterval(st.timer);
   st.qz = null;
@@ -296,4 +330,19 @@ const PACTIONS = {
 panel.addEventListener('click', e => {
   const b = e.target.closest('[data-pact]');
   if (b && !b.disabled) PACTIONS[b.dataset.pact](b, e);
+});
+panel.addEventListener('click', e => {
+  const b = e.target.closest('[data-lmode]');
+  if (!b) return;
+  const base = LIST_MODULES[activeList] || LIST_MODULES[document.body.dataset.app];
+  if (!base?.modes) return;
+  const st = listState[base.id];
+  if (st.view !== 'home') return;
+  const modeId = b.dataset.lmode;
+  if (!base.modes[modeId] || st.mode === modeId) return;
+  st.mode = modeId;
+  st.qz = null;
+  clearInterval(st.timer);
+  if (base.modeStoreKey) { store[base.modeStoreKey] = modeId; save(); }
+  renderList(base);
 });

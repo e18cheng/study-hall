@@ -9,7 +9,7 @@ const norm = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
 // Persistence (per browser)
 // ---------------------------------------------------------------------------
 const STORE_KEY = 'countrydrill.v1';
-const store = { selected: [], learned: [], best: {}, stats: {}, labels: true, terrRegions: [], hard: false, capStats: {}, capBest: {}, showCapitals: true, shakesMemorized: [], shakesPool: 'all', elemStats: {}, elemBest: {}, elemPool: 'all', elemNames: true, elemColors: true, elemSelected: 26, warStats: {}, warBest: {}, warPool: 'core' };
+const store = { selected: [], learned: [], best: {}, stats: {}, labels: true, terrRegions: [], hard: false, capStats: {}, capBest: {}, showCapitals: true, shakesMemorized: [], shakesPool: 'all', elemStats: {}, elemBest: {}, elemPool: 'all', elemNames: true, elemColors: true, elemSelected: 26, warStats: {}, warBest: {}, warPool: 'core', presMode: 'order' };
 try { Object.assign(store, JSON.parse(localStorage.getItem(STORE_KEY)) || {}); } catch (e) {}
 function save() { try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); } catch (e) {} }
 
