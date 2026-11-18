@@ -1,7 +1,7 @@
 // Bump CACHE whenever a release changes anything in ASSETS. The old worker keeps
 // serving the old cache until every tab using it is closed, so a version bump is what
 // makes the next launch pick up new files.
-const CACHE = 'study-hall-v23';
+const CACHE = 'study-hall-v24';
 
 // Relative paths: the site lives under /study-hall/ on GitHub Pages.
 const ASSETS = [
@@ -34,8 +34,14 @@ const ASSETS = [
   './icon-512.png',
 ];
 
+// GitHub Pages serves assets with a short max-age, so a plain addAll can pick up
+// the previous release from the browser's HTTP cache. Tag each install URL with
+// the cache version and ask for a fresh copy; the fetch handler ignores search
+// strings, so the plain paths still resolve from this cache.
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(ASSETS)));
+  const version = CACHE.replace('study-hall-', '');
+  const requests = ASSETS.map((path) => new Request(`${path}?v=${version}`, { cache: 'reload' }));
+  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(requests)));
 });
 
 self.addEventListener('activate', (event) => {
