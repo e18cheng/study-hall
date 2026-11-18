@@ -70,6 +70,7 @@ addListModule({
       items: PRES,
       ordered: true,
       bestKey: 'presBest',
+      subInQuiz: false,
       blurb: `Type all ${PRES.length} presidents in order. A surname is enough; full names and common nicknames work too.`,
       legendTitle: 'Party key', legend: PARTIES,
       notesHtml: VP_NOTES,

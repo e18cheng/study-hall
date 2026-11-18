@@ -41,8 +41,11 @@ function listLegendHtml(cfg) {
 function listRow(cfg, item, i) {
   const st = listSt(cfg), qz = st.qz;
   const quiz = st.view === 'quiz' && qz;
-  const sub = item.sub ? `<span class="lsub">${esc(item.sub)}</span>` : '';
-  const extra = item.sub ? ' has-sub' : '';
+  // Paired modes show the pairing during the quiz; the plain presidents drill
+  // keeps its rows clean and only shows VPs in the study list.
+  const showSub = item.sub && (cfg.subInQuiz !== false || st.view === 'home');
+  const sub = showSub ? `<span class="lsub">${esc(item.sub)}</span>` : '';
+  const extra = showSub ? ' has-sub' : '';
   if (!quiz) {
     return `<li class="lrow done${extra}" title="${esc(item.tip)}"><span class="ln">${item.n}</span>
       <span class="ldot ${item.cls}"></span><span class="lname">${esc(item.name)}</span><span class="lmeta">${esc(item.meta)}</span>${sub}</li>`;
