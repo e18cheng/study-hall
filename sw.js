@@ -1,7 +1,7 @@
 // Bump CACHE whenever a release changes anything in ASSETS. The old worker keeps
 // serving the old cache until every tab using it is closed, so a version bump is what
 // makes the next launch pick up new files.
-const CACHE = 'study-hall-v24';
+const CACHE = 'study-hall-v25';
 
 // Relative paths: the site lives under /study-hall/ on GitHub Pages.
 const ASSETS = [
@@ -39,7 +39,7 @@ const ASSETS = [
 // the cache version and ask for a fresh copy; the fetch handler ignores search
 // strings, so the plain paths still resolve from this cache.
 self.addEventListener('install', (event) => {
-  const version = CACHE.replace('study-hall-', '');
+  const version = CACHE.replace('study-hall-v', '');
   const requests = ASSETS.map((path) => new Request(`${path}?v=${version}`, { cache: 'reload' }));
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(requests)));
 });
